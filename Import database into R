@@ -1,0 +1,22 @@
+getwd() #get working directory
+setwd("~/Desktop/764/Dataset/Data/Data_real") #set working directory
+install.packages("tree") #install tree package
+install.packages("randomForest") #install RandomForest
+install.packages("DBI")
+
+library("DBI")
+library("RSQLite")
+db = dbConnect(SQLite(), dbname="loans.sqlite")
+tables <- dbListTables(db)
+
+## exclude sqlite_sequence (contains table information)
+tables <- tables[tables != "sqlite_sequence"]
+
+lDataFrames <- vector("list", length=length(tables))
+
+## create a data.frame for each table
+for (i in seq(along=tables)) {
+  lDataFrames[[i]] <- dbGetQuery(conn=db, statement=paste("SELECT * FROM '", tables[[i]], "'", sep=""))
+}
+
+view()
