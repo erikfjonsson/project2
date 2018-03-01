@@ -23,17 +23,15 @@ library(RSQLite)
 
 # connect the DB
 db = dbConnect(SQLite(), dbname="loans.sqlite")
-tables = dbListTables(db)
+tables = dbListTables(db)[1]
 
 # exclude sqlite sequence 
 tables = tables[tables != "sqlite_sequence"]
 lDataFrames = vector("list", length=length(tables))
 
-# create a data.frame for each table
-for (i in seq(along=tables))
-{
-  lDataFrames[[i]] <- dbGetQuery(conn=db, statement=paste("SELECT * FROM '", tables[[i]], "'", sep=""))
-}
+lDataFrames[[1]] = dbGetQuery(conn=db, statement=paste("SELECT * FROM '", tables[[1]], "'", sep=""))
+
+loansacc = lDataFrames[[1]]
 
 ######################################################################
 
