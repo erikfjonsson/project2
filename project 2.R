@@ -24,12 +24,12 @@ library(RSQLite)
 db = dbConnect(SQLite(), dbname="loans.sqlite")
 tables = dbListTables(db)
 
-# exclude sqlite_sequence (contains table information)
+# exclude sqlite sequence
 tables = tables[tables != "sqlite_sequence"]
 
 lDataFrames = vector("list", length=length(tables))
 
-# create a data.frame for each table
+# create a data frame for table 3
 lDataFrames[[3]] = dbGetQuery(conn=db, statement=paste("SELECT * FROM '", tables[[3]], "'", sep=""))
 
 # create dataframe
@@ -41,32 +41,9 @@ dbDisconnect(db)
 #remove
 rm(db, lDataFrames, tables)
 
-######################################################################
+## clean the data further
 
-## further clean the data
-
-########## CODE NO LONGER NEEDED SINCE WE INSTEAD IMPORTED FROM THE SQL-DB ##########
-
-# # import data with accepted loans
-# loansacc = read.csv("loans_accepted.csv", header=TRUE, sep=",", dec="." )
-
-# # remove observations with unknown year
-# loansacc = loansacc[!(loansacc$issue_d == ""),]
-# 
-# # remove observations from 2007 due to changed credit model
-# loansacc = loansacc[!(substring(loansacc$issue_d, 5, 9) == "2007"),]
-# 
-# # change issue_d column to display only year instead of year and month and rename it, should we do this?
-# # loansacc$issue_d = substring(loansacc$issue_d, 5, 9)
-# # colnames(loansacc)[16] = "year
-# 
-# # replace zeros with NA for two columns
-# loansacc[loansacc$last_fico_range_high == "0", 51] = NA
-# loansacc[loansacc$last_fico_range_low == "0", 52] = NA
-
-########## END OF CODE NO LONGER NEEDED SINCE WE INSTEAD IMPORTED FROM THE SQL-DB ##########
-
-######################################################################
+#convert some strings
 
 ## set the seed
 set.seed(1)
