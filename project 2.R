@@ -14,76 +14,34 @@ setwd("C:/Users/erikj/Documents/764 local files/project 2")
 #get relevant libraries
 library(tree)
 library(randomForest)
-library(DBI)
-library(RSQLite)
 
 ######################################################################
 
 ## import data with accepted loans
-
-db = dbConnect(SQLite(), dbname="loans.sqlite")
-tables = dbListTables(db)
-
-# exclude sqlite sequence
-tables = tables[tables != "sqlite_sequence"]
-
-lDataFrames = vector("list", length=length(tables))
-
-# create a data frame for table 3
-lDataFrames[[3]] = dbGetQuery(conn=db, statement=paste("SELECT * FROM '", tables[[3]], "'", sep=""))
-
-# create dataframe
-loansacc = lDataFrames[[3]]
-
-#disconnect
-dbDisconnect(db)
-
-#remove
-rm(db, lDataFrames, tables)
+loansacc = read.csv("loans_accepted.csv", header=TRUE, sep=",", dec=".", stringsAsFactors = TRUE) #import data with accepted loans
 
 ######################################################################
 
-## clean the data further
+## clean the data
 
-# drop some columns
-loansacc$issue_d = NULL
-loansacc$zip_code = NULL
-loansacc$last_pymnt_d = NULL
-loansacc$earliest_cr_line = NULL
-loansacc$last_credit_pull_d = NULL
-loansacc$sub_grade = NULL
-loansacc$addr_state = NULL
+# drop observations where loan_status is unknown
+loansacc = loansacc[!(loansacc$loan_status == ""),]
 
+# drop observations from 2007
+loansacc = loansacc[!(substring(loansacc$issue_d, 5, 9) == "2007"),]
 
-# remove unit measure from term column
+# drop joint loans
+loansacc = loansacc[!(loansacc$application_type != "Individual"),]
+
+# drop all colums with more than 32 factor levels
+loansacc = loansacc[sapply(loansacc, nlevels) <= 32]
+
+# convert term to numeric, SHOULD WE REALLY DO THIS, PERHAPS BETTER AS FACTOR LEVELS?
 loansacc$term = substring(loansacc$term, 2, 3)
-
-# change employment length to zero if undefined
-loansacc$emp_length[loansacc$emp_length == ''] = '0'
-
-#recodes < 1 to 1 in employment length
-loansacc$emp_length[loansacc$emp_length == '< 1 year'] = '1'
-
-# removes non numeric characters from employment legnth
-loansacc$emp_length= substr(loansacc$emp_length, 0, 2)
-
-# convert some strings to numeric
-loansacc$id = as.numeric(loansacc$id)
 loansacc$term = as.numeric(loansacc$term)
-loansacc$emp_length = as.numeric(loansacc$emp_length)
-loansacc$year = as.numeric(loansacc$year)
 
-#convert some strings to factors
-loansacc$grade = as.factor(loansacc$grade)
-loansacc$home_ownership = as.factor(loansacc$home_ownership)
-loansacc$verification_status = as.factor(loansacc$verification_status)
-loansacc$loan_status = as.factor(loansacc$loan_status)
-loansacc$purpose = as.factor(loansacc$purpose)
-loansacc$initial_list_status = as.factor(loansacc$initial_list_status)
-loansacc$hardship_flag = as.factor(loansacc$hardship_flag)
-loansacc$disbursement_method = as.factor(loansacc$disbursement_method)
-loansacc$debt_settlement_flag = as.factor(loansacc$debt_settlement_flag)
-
+# drop all colums with more than 10% NAs, IS THIS CORRECT?
+loansacc = loansacc[, -which(colMeans(is.na(loansacc)) > 0.1)]
 
 ######################################################################
 
