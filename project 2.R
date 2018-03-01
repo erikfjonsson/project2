@@ -41,16 +41,28 @@ dbDisconnect(db)
 #remove
 rm(db, lDataFrames, tables)
 
+######################################################################
+
 ## clean the data further
 
 # remove unit measure from term column
 loansacc$term = substring(loansacc$term, 2, 3)
 
-# convert som strings to numeric
+# change employment length to zero if undefined
+loansacc$emp_length[loansacc$emp_length == ''] = '0'
+
+#recodes < 1 to 1 in employment length
+loansacc$emp_length[loansacc$emp_length == '< 1 year'] = '1'
+
+# removes non numeric characters from employment legnth
+loansacc$emp_length= substr(loansacc$emp_length, 0, 2)
+
+# convert some strings to numeric
 loansacc$id = as.numeric(loansacc$id)
 loansacc$term = as.numeric(loansacc$term)
+loansacc$emp_length = as.numeric(loansacc$emp_length)
 
-#convert some strings
+######################################################################
 
 ## set the seed
 set.seed(1)
