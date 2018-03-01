@@ -45,6 +45,16 @@ rm(db, lDataFrames, tables)
 
 ## clean the data further
 
+# drop some columns
+loansacc$issue_d = NULL
+loansacc$zip_code = NULL
+loansacc$last_pymnt_d = NULL
+loansacc$earliest_cr_line = NULL
+loansacc$last_credit_pull_d = NULL
+loansacc$sub_grade = NULL
+loansacc$addr_state = NULL
+
+
 # remove unit measure from term column
 loansacc$term = substring(loansacc$term, 2, 3)
 
@@ -61,6 +71,19 @@ loansacc$emp_length= substr(loansacc$emp_length, 0, 2)
 loansacc$id = as.numeric(loansacc$id)
 loansacc$term = as.numeric(loansacc$term)
 loansacc$emp_length = as.numeric(loansacc$emp_length)
+loansacc$year = as.numeric(loansacc$year)
+
+#convert some strings to factors
+loansacc$grade = as.factor(loansacc$grade)
+loansacc$home_ownership = as.factor(loansacc$home_ownership)
+loansacc$verification_status = as.factor(loansacc$verification_status)
+loansacc$loan_status = as.factor(loansacc$loan_status)
+loansacc$purpose = as.factor(loansacc$purpose)
+loansacc$initial_list_status = as.factor(loansacc$initial_list_status)
+loansacc$hardship_flag = as.factor(loansacc$hardship_flag)
+loansacc$disbursement_method = as.factor(loansacc$disbursement_method)
+loansacc$debt_settlement_flag = as.factor(loansacc$debt_settlement_flag)
+
 
 ######################################################################
 
