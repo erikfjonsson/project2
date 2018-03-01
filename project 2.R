@@ -29,9 +29,17 @@ tables = dbListTables(db)[1]
 tables = tables[tables != "sqlite_sequence"]
 lDataFrames = vector("list", length=length(tables))
 
+# load table with loans accepted
 lDataFrames[[1]] = dbGetQuery(conn=db, statement=paste("SELECT * FROM '", tables[[1]], "'", sep=""))
 
+# create dataframe
 loansacc = lDataFrames[[1]]
+
+#disconnect
+dbDisconnect(db)
+
+#remove
+rm(db, lDataFrames)
 
 ######################################################################
 
