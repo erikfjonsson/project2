@@ -21,25 +21,25 @@ library(RSQLite)
 
 ## import data with accepted loans
 
-# connect the DB
 db = dbConnect(SQLite(), dbname="loans.sqlite")
-tables = dbListTables(db)[1]
+tables = dbListTables(db)
 
-# exclude sqlite sequence 
+# exclude sqlite_sequence (contains table information)
 tables = tables[tables != "sqlite_sequence"]
+
 lDataFrames = vector("list", length=length(tables))
 
-# load table with loans accepted
-lDataFrames[[1]] = dbGetQuery(conn=db, statement=paste("SELECT * FROM '", tables[[1]], "'", sep=""))
+# create a data.frame for each table
+lDataFrames[[3]] = dbGetQuery(conn=db, statement=paste("SELECT * FROM '", tables[[3]], "'", sep=""))
 
 # create dataframe
-loansacc = lDataFrames[[1]]
+loansacc = lDataFrames[[3]]
 
 #disconnect
 dbDisconnect(db)
 
 #remove
-rm(db, lDataFrames)
+rm(db, lDataFrames, tables)
 
 ######################################################################
 
@@ -65,9 +65,6 @@ rm(db, lDataFrames)
 # loansacc[loansacc$last_fico_range_low == "0", 52] = NA
 
 ########## END OF CODE NO LONGER NEEDED SINCE WE INSTEAD IMPORTED FROM THE SQL-DB ##########
-
-# remove columns with many NAs
-loansacc[ , colSums(is.na(loansacc)) > 1000]
 
 ######################################################################
 
