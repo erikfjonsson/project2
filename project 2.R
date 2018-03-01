@@ -43,6 +43,13 @@ rm(db, lDataFrames, tables)
 
 ## clean the data further
 
+# remove unit measure from term column
+loansacc$term = substring(loansacc$term, 2, 3)
+
+# convert som strings to numeric
+loansacc$id = as.numeric(loansacc$id)
+loansacc$term = as.numeric(loansacc$term)
+
 #convert some strings
 
 ## set the seed
