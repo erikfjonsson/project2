@@ -79,6 +79,19 @@ loansacc$total_rec_prncp = NULL
 loansacc$installment = NULL
 loansacc$tot_coll_amt = NULL
 loansacc$collection_recovery_fee = NULL
+loansacc$chargeoff_within_12_mths = NULL
+loansacc$hardship_flag = NULL
+loansacc$hardship_type = NULL
+loansacc$hardship_reason = NULL
+loansacc$hardship_status = NULL
+loansacc$hardship_start_date = NULL
+loansacc$hardship_end_date = NULL
+loansacc$hardship_loan_status = NULL
+loansacc$payment_plan_start_date = NULL
+loansacc$debt_settlement_flag = NULL
+loansacc$debt_settlement_flag_date = NULL
+loansacc$settlement_status = NULL
+loansacc$settlement_date = NULL
 
 ## clean the data further
 
@@ -98,6 +111,9 @@ loansacc = loansacc[!(loansacc$fully_paid == "ongoing"),]
 
 # convert the recoded status variable to factor
 loansacc$fully_paid = as.factor(loansacc$fully_paid)
+
+# drop columns with more than 15 factor levels
+loansacc = loansacc[sapply(loansacc, nlevels) <= 15]
 
 ######################################################################
 
@@ -120,7 +136,7 @@ loansacc.testing = loansacc[-training, ]
 # text(tree1.loansacc, pretty = 0)
 
 ## create and show the tree
-tree2.loansacc = rpart(fully_paid ~ ., data = loansacc.training, method = "class")
+tree2.loansacc = rpart(fully_paid ~ ., data = loansacc.training, method = "class", control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0006))
 summary(tree2.loansacc)
 plot(tree2.loansacc)
 text(tree2.loansacc, pretty = 0)
