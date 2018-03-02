@@ -93,8 +93,6 @@ loansacc$payment_plan_start_date = NULL
 loansacc$settlement_status = NULL
 loansacc$debt_settlement_flag = NULL
 
-loansacc$term = NULL
-
 # create variable for average of the two fico ranges
 loansacc$fico = (loansacc$fico_range_high + loansacc$fico_range_low)/2
 
@@ -130,11 +128,11 @@ loansacc.testing = loansacc[-training, ]
 
 #################### SOME TREE ALGORITHMS ####################
 
-## create and show the tree
-tree1.loansacc = tree(loan_status ~ ., data = loansacc.training, method = "class")
-summary(tree1.loansacc)
-plot(tree1.loansacc)
-text(tree1.loansacc, pretty = 0)
+# ## create and show the tree
+# tree1.loansacc = tree(fully_paid ~ ., data = loansacc.training, method = "class")
+# summary(tree1.loansacc)
+# plot(tree1.loansacc)
+# text(tree1.loansacc, pretty = 0)
 
 # ## create and show the tree
 # tree2.loansacc = rpart(fully_paid ~ ., data = loansacc.training, method = "class")
