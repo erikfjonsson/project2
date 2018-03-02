@@ -14,6 +14,7 @@ setwd("C:/Users/erikj/Documents/764 local files/project 2")
 #get relevant libraries
 library(tree)
 library(randomForest)
+library(rpart)
 
 ######################################################################
 
@@ -103,11 +104,15 @@ loansacc$fully_paid[loansacc$loan_status == "Default" | loansacc$loan_status == 
 loansacc$fully_paid[loansacc$loan_status == "Fully Paid" | loansacc$loan_status == "Does not meet the credit policy. Status:Fully Paid"] = "fully_paid"
 loansacc$fully_paid[loansacc$loan_status == "Late (16-30 days)" | loansacc$loan_status == "Late (31-120 days)" | loansacc$loan_status == "In Grace Period" | loansacc$loan_status == "Current"] = "ongoing"
 
+#drop ongoing loans
+loansacc = loansacc[!(loansacc$fully_paid == "ongoing"),]
+
 # convert the recoded variable to factor
 loansacc$fully_paid = as.factor(loansacc$fully_paid)
 
 # drop old loan_status variable
 loansacc$loan_status = NULL
+
 
 ######################################################################
 
@@ -126,7 +131,7 @@ loansacc.testing = loansacc[-training, ] #creates the testing dataset
 
 
 # create and plot the tree
-tree.loansacc = tree(loan_status ~ ., data = loansacc.training) #creates a tree
+tree.loansacc = rpart(fully_paid ~ ., data = loansacc.training) #creates a tree
 
 plot(tree.loansacc) # plot the tree
 
