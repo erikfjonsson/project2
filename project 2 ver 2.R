@@ -153,8 +153,9 @@ loansacc$earliest_cr_line = parse_date_time(loansacc$earliest_cr_line, "myd")
 loansacc$time_since_first_credit = loansacc$issue_d - loansacc$earliest_cr_line
 loansacc$time_since_first_credit = as.numeric(loansacc$time_since_first_credit)
 
-#drop earliest credit line
+#drop earliest credit line and issue_d
 loansacc$earliest_cr_line = NULL
+loansacc$issue_d = NULL
 
 ######################################################################
 
@@ -166,15 +167,20 @@ set.seed(1)
 #################### SOME TREE ALGORITHMS ####################
 
 ## create and show the tree
-tree1.loansacc = rpart(fully_paid ~ ., data = loansacc, method = "class", control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0006))
-plot(tree1.loansacc)
-text(tree1.loansacc, pretty = 0)
-printcp(tree1.loansacc)
+treegini.loansacc = rpart(fully_paid ~., data = loansacc, method = "class", parms = list(split = "gini"), control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0001))
+plot(treegini.loansacc)
+text(treegini.loansacc, pretty = 0)
+printcp(treegini.loansacc)
+plotcp(treegini.loansacc)
+
+# prune the tree
+treegini.loansacc$cptable[which.min(treegini.loansacc$cptable[,"xerror"]),"CP"]
 
 #create and show the tree
-tree2.loansacc = tree(fully_paid ~ ., data = loansacc, method = "class", control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0006)
-summary(tree2.loansacc)
-plot(tree2.loansacc)
-text(tree2.loansacc, pretty = 0)
+treeentrop.loansacc = rpart(fully_paid ~ ., data = loansacc, method = "class", parms = list(split = "information"), control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0006))
+plot(treeentrop.loansacc)
+text(treeentrop.loansacc, pretty = 0)
+printcp(treeentrop.loansacc)
+plotcp(treeentrop.loansacc)
 
 #################### END OF SOME TREE ALGORITHMS ####################
