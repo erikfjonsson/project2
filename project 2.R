@@ -98,7 +98,16 @@ loansacc$fico = (loansacc$fico_range_high + loansacc$fico_range_low)/2
 loansacc$fico_range_high = NULL
 loansacc$fico_range_low = NULL
 
+# create recoded version of the loan_status variable
+loansacc$fully_paid[loansacc$loan_status == "Default" | loansacc$loan_status == "Charged Off" | loansacc$loan_status == "Does not meet the credit policy. Status:Charged Off"] = "default"
+loansacc$fully_paid[loansacc$loan_status == "Fully Paid" | loansacc$loan_status == "Does not meet the credit policy. Status:Fully Paid"] = "fully_paid"
+loansacc$fully_paid[loansacc$loan_status == "Late (16-30 days)" | loansacc$loan_status == "Late (31-120 days)" | loansacc$loan_status == "In Grace Period" | loansacc$loan_status == "Current"] = "ongoing"
 
+# convert the recoded variable to factor
+loansacc$fully_paid = as.factor(loansacc$fully_paid)
+
+# drop old loan_status variable
+loansacc$loan_status = NULL
 
 ######################################################################
 
