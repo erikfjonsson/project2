@@ -114,7 +114,7 @@ loansacc = loansacc[!(loansacc$fully_paid == "ongoing"),]
 # convert the recoded status variable to factor
 loansacc$fully_paid = as.factor(loansacc$fully_paid)
 
-# create recoded version of the state variable accordning to regions and drop old variable
+# create recoded version of the state variable accordning to regions and drop old variable, convert to factor
 Pacific = c("WA", "OR", "CA", "AK", "HI")
 Mountain = c("NV", "ID", "MT", "WY", "UT", "CO", "AZ", "NM")
 Midwest = c("ND", "SD", "NE", "KS", "MN", "IA", "MO")
@@ -137,6 +137,7 @@ loansacc$state_region = with(loansacc,
   "other")))))))))
 )
 loansacc$addr_state = NULL
+loansacc$state_region = as.factor(loansacc$state_region)
 
 # convert issue_d to date
 loansacc$issue_d = as.character(loansacc$issue_d)
@@ -151,6 +152,9 @@ loansacc$earliest_cr_line = parse_date_time(loansacc$earliest_cr_line, "myd")
 # create variable for time since earliest credit line and convert to numeric
 loansacc$time_since_first_credit = loansacc$issue_d - loansacc$earliest_cr_line
 loansacc$time_since_first_credit = as.numeric(loansacc$time_since_first_credit)
+
+#drop earliest credit line
+loansacc$earliest_cr_line = NULL
 
 ######################################################################
 
