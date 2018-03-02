@@ -167,20 +167,47 @@ set.seed(1)
 #################### SOME TREE ALGORITHMS ####################
 
 ## create and show the tree
-treegini.loansacc = rpart(fully_paid ~., data = loansacc, method = "class", parms = list(split = "gini"), control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0001))
+treegini1.loansacc = rpart(fully_paid ~., data = loansacc, method = "class", parms = list(split = "gini"), control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0001))
 plot(treegini.loansacc)
 text(treegini.loansacc, pretty = 0)
 printcp(treegini.loansacc)
 plotcp(treegini.loansacc)
 
 # prune the tree
-treegini.loansacc$cptable[which.min(treegini.loansacc$cptable[,"xerror"]),"CP"]
+treegini1.loansacc$cptable[which.min(treegini1.loansacc$cptable[,"xerror"]),"CP"]
+prune1 = treegini1.loansacc$cptable[which.min(treegini1.loansacc$cptable[,"xerror"]),"CP"]
 
-#create and show the tree
-treeentrop.loansacc = rpart(fully_paid ~ ., data = loansacc, method = "class", parms = list(split = "information"), control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0006))
-plot(treeentrop.loansacc)
-text(treeentrop.loansacc, pretty = 0)
-printcp(treeentrop.loansacc)
-plotcp(treeentrop.loansacc)
+# runt tree again
+treegini2.loansacc = rpart(fully_paid ~., data = loansacc, method = "class", parms = list(split = "gini"), control = rpart.control(minsplit = 10, minbucket = 3, cp = prune1))
+plot(treegini2.loansacc)
+text(treegini2.loansacc, pretty = 0)
+printcp(treegini2.loansacc)
+plotcp(treegini2.loansacc)
+
+# prune the tree
+treegini2.loansacc$cptable[which.min(treegini2.loansacc$cptable[,"xerror"]),"CP"]
+
+#########
+
+## create and show the tree
+treeinformation1.loansacc = rpart(fully_paid ~., data = loansacc, method = "class", parms = list(split = "information"), control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0001))
+plot(treeinformation1.loansacc)
+text(treeinformation1.loansacc, pretty = 0)
+printcp(treeinformation1.loansacc)
+plotcp(treeinformation1.loansacc)
+
+# prune the tree
+treeinformation1.loansacc$cptable[which.min(treeinformation1.loansacc$cptable[,"xerror"]),"CP"]
+prune2 = treeinformation1.loansacc$cptable[which.min(treeinformation1.loansacc$cptable[,"xerror"]),"CP"]
+
+# runt tree again
+treeinformation2.loansacc = rpart(fully_paid ~., data = loansacc, method = "class", parms = list(split = "information"), control = rpart.control(minsplit = 10, minbucket = 3, cp = prune1))
+plot(treeinformation2.loansacc)
+text(treeinformation2.loansacc, pretty = 0)
+printcp(treeinformation2.loansacc)
+plotcp(treeinformation2.loansacc)
+
+# prune the tree
+treeinformation2.loansacc$cptable[which.min(treeinformation2.loansacc$cptable[,"xerror"]),"CP"]
 
 #################### END OF SOME TREE ALGORITHMS ####################
