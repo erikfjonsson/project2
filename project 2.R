@@ -120,19 +120,12 @@ loansacc$loan_status = NULL
 set.seed(1)
 
 
-## split the data set
+## create tree
+tree.loansacc = tree(fully_paid~., loansacc)
 
-# split the dataset
-training = sample(dim(loansacc)[1], dim(loansacc)[1]/2) #process for splitting the dataset
+## explore the tree
+# summary(tree.loansacc)
+# plot(tree.loansacc)
+# text(tree.loansacc, pretty = 0)
+# tree.loansacc
 
-loansacc.training = loansacc[training, ] #creates the training dataset
-
-loansacc.testing = loansacc[-training, ] #creates the testing dataset
-
-
-# create and plot the tree
-tree.loansacc = rpart(fully_paid ~ ., data = loansacc.training) #creates a tree
-
-plot(tree.loansacc) # plot the tree
-
-text(tree.loansacc, pretty = 0) # formatting the graph
