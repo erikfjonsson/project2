@@ -129,3 +129,13 @@ tree.loansacc = tree(fully_paid~., loansacc)
 # text(tree.loansacc, pretty = 0)
 # tree.loansacc
 
+## split the dataset
+training = sample(dim(loansacc)[1], dim(loansacc)[1]/2)
+loansacc.training = loansacc[training, ]
+loansacc.testing = loansacc[-training, ]
+
+## create a new tree
+tree.loansacc = tree(fully_paid~., loansacc, subset = training)
+tree.pred = predict(tree.loansacc, loansacc.training, type = "class")
+table = table(tree.pred, loansacc.testing)
+sum(diag(table))/sum(table)
