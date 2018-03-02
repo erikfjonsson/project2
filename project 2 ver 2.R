@@ -168,10 +168,10 @@ set.seed(1)
 
 ## create and show the tree
 treegini1.loansacc = rpart(fully_paid ~., data = loansacc, method = "class", parms = list(split = "gini"), control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0001))
-plot(treegini.loansacc)
-text(treegini.loansacc, pretty = 0)
-printcp(treegini.loansacc)
-plotcp(treegini.loansacc)
+plot(treegini1.loansacc)
+text(treegini1.loansacc, pretty = 0)
+printcp(treegini1.loansacc)
+plotcp(treegini1.loansacc)
 
 # prune the tree
 treegini1.loansacc$cptable[which.min(treegini1.loansacc$cptable[,"xerror"]),"CP"]
