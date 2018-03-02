@@ -54,7 +54,7 @@ loansacc$total_pymnt_inv = NULL
 loansacc$total_rec_prncp = NULL
 loansacc$total_rec_int = NULL
 loansacc$total_rec_late_fee = NULL
-loansacc$total_acc = NULL
+# loansacc$total_acc = NULL
 loansacc$recoveries = NULL
 loansacc$collection_recovery_fee = NULL
 loansacc$last_pymnt_amnt = NULL
@@ -63,11 +63,11 @@ loansacc$last_fico_range_low = NULL
 loansacc$collections_12_mths_ex_med = NULL
 loansacc$policy_code = NULL
 loansacc$application_type = NULL
-loansacc$acc_now_delinq = NULL
+# loansacc$acc_now_delinq = NULL
 loansacc$application_type = NULL
 loansacc$verification_status_joint = NULL
-loansacc$bc_open_to_buy = NULL
-loansacc$bc_util = NULL
+# loansacc$bc_open_to_buy = NULL
+# loansacc$bc_util = NULL
 loansacc$chargeoff_within_12_mths = NULL
 loansacc$delinq_amnt = NULL
 # loansacc$mo_sin_old_il_acct = NULL
@@ -76,12 +76,29 @@ loansacc$delinq_amnt = NULL
 # loansacc$mo_sin_rcnt_tl = NULL
 # loansacc$mths_since_recent_bc = NULL
 # loansacc$mths_since_recent_inq = NULL
-loansacc$num_accts_ever_120_pd
-loansacc$num_actv_bc_tl
+# loansacc$mths_since_recent_bc = NULL
+# loansacc$mths_since_recent_inq = NULL
+loansacc$num_tl_120dpd_2m = NULL
+loansacc$num_tl_30dpd = NULL
+loansacc$hardship_flag = NULL
+loansacc$hardship_type = NULL
+loansacc$hardship_reason = NULL
+loansacc$hardship_status = NULL
+loansacc$hardship_start_date = NULL
+loansacc$hardship_end_date = NULL
+loansacc$hardship_loan_status = NULL
+loansacc$payment_plan_start_date = NULL
+loansacc$settlement_status = NULL
+loansacc$debt_settlement_flag = NULL
+
+# create variable for average of the two fico ranges
+loansacc$fico = (loansacc$fico_range_high + loansacc$fico_range_low)/2
+
+#drop old ficos
+loansacc$fico_range_high = NULL
+loansacc$fico_range_low = NULL
 
 
-# DTI hur gör vi?
-# FICO ny variable
 
 ######################################################################
 
