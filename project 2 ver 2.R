@@ -16,6 +16,7 @@ library(tree)
 library(randomForest)
 library(rpart)
 library(party)
+library(lubridate)
 
 ## import data with accepted loans
 loansacc = read.csv("loans_accepted.csv", header=TRUE, sep=",", dec=".", stringsAsFactors = TRUE) #import data with accepted loans
@@ -51,6 +52,7 @@ loansacc$id = NULL
 loansacc$emp_title = NULL
 loansacc$desc = NULL
 loansacc$title = NULL
+loansacc$zip_code = NULL
 
 # drop columns that contain ex-post data
 loansacc$collection_recovery_fee = NULL
@@ -112,8 +114,43 @@ loansacc = loansacc[!(loansacc$fully_paid == "ongoing"),]
 # convert the recoded status variable to factor
 loansacc$fully_paid = as.factor(loansacc$fully_paid)
 
-# drop columns with more than 15 factor levels
-loansacc = loansacc[sapply(loansacc, nlevels) <= 15]
+# create recoded version of the state variable accordning to regions and drop old variable
+Pacific = c("WA", "OR", "CA", "AK", "HI")
+Mountain = c("NV", "ID", "MT", "WY", "UT", "CO", "AZ", "NM")
+Midwest = c("ND", "SD", "NE", "KS", "MN", "IA", "MO")
+East_North_Central = c("WI", "IL", "IN", "OH", "MI")
+West_South_Central = c("OK", "AR", "TX", "LA")
+East_South_Central = c("KY", "TN", "MS", "AL")
+South_Atlantic = c("DE", "MD", "VA", "DC", "WV", "NC", "SC", "GA", "FL")
+Middle_Atlantic = c("NY", "PA", "NJ")
+New_England = c("ME", "NH", "VT", "MA", "CT", "RI")
+loansacc$state_region = with(loansacc,
+  ifelse(addr_state %in% Pacific, "Pacific",
+  ifelse(addr_state %in% Mountain, "Mountain", 
+  ifelse(addr_state %in% Midwest, "Midwest",
+  ifelse(addr_state %in% East_North_Central, "East_North_Central",
+  ifelse(addr_state %in% West_South_Central, "West_South_Central",
+  ifelse(addr_state %in% East_South_Central, "East_South_Central",
+  ifelse(addr_state %in% South_Atlantic, "South_Atlantic",
+  ifelse(addr_state %in% Middle_Atlantic, "Middle_Atlantic",
+  ifelse(addr_state %in% New_England, "New_England",
+  "other")))))))))
+)
+loansacc$addr_state = NULL
+
+# convert issue_d to date
+loansacc$issue_d = as.character(loansacc$issue_d)
+loansacc$issue_d = paste(loansacc$issue_d, "-01", sep = "")
+loansacc$issue_d = parse_date_time(loansacc$issue_d, "myd")
+
+# convert earliest credit line to date
+loansacc$earliest_cr_line = as.character(loansacc$earliest_cr_line)
+loansacc$earliest_cr_line = paste(loansacc$earliest_cr_line, "-01", sep = "")
+loansacc$earliest_cr_line = parse_date_time(loansacc$earliest_cr_line, "myd")
+
+# create variable for time since earliest credit line and convert to numeric
+loansacc$time_since_first_credit = loansacc$issue_d - loansacc$earliest_cr_line
+loansacc$time_since_first_credit = as.numeric(loansacc$time_since_first_credit)
 
 ######################################################################
 
@@ -129,16 +166,16 @@ loansacc.testing = loansacc[-training, ]
 
 #################### SOME TREE ALGORITHMS ####################
 
-# ## create and show the tree
-# tree1.loansacc = tree(fully_paid ~ ., data = loansacc.training, method = "class")
-# summary(tree1.loansacc)
-# plot(tree1.loansacc)
-# text(tree1.loansacc, pretty = 0)
-
 ## create and show the tree
-tree2.loansacc = rpart(fully_paid ~ ., data = loansacc.training, method = "class", control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0006))
-summary(tree2.loansacc)
-plot(tree2.loansacc)
-text(tree2.loansacc, pretty = 0)
+tree1.loansacc = rpart(fully_paid ~ ., data = loansacc.training, method = "class", control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0006))
+plot(tree1.loansacc)
+text(tree1.loansacc, pretty = 0)
+printcp(tree1.loansacc)
+
+# ## create and show the tree
+# tree2.loansacc = tree(fully_paid ~ ., data = loansacc.training, method = "class")
+# summary(tree2.loansacc)
+# plot(tree2.loansacc)
+# text(tree2.loansacc, pretty = 0)
 
 #################### END OF SOME TREE ALGORITHMS ####################
