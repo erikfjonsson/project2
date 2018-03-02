@@ -164,10 +164,15 @@ loansacc$issue_d = NULL
 ## set the seed
 set.seed(1)
 
+##split dataset
+training = sample(dim(loansacc)[1], dim(loansacc)[1]/2)
+loansacc.training = loansacc[training, ]
+loansacc.testing = loansacc[-training, ]
+
 #################### SOME TREE ALGORITHMS ####################
 
 ## create and show the tree
-treegini1.loansacc = rpart(fully_paid ~., data = loansacc, method = "class", parms = list(split = "gini"), control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0001))
+treegini1.loansacc = rpart(fully_paid ~., data = loansacc.training, method = "class", parms = list(split = "gini"), control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0001))
 plot(treegini1.loansacc)
 text(treegini1.loansacc, pretty = 0)
 printcp(treegini1.loansacc)
@@ -177,8 +182,8 @@ plotcp(treegini1.loansacc)
 treegini1.loansacc$cptable[which.min(treegini1.loansacc$cptable[,"xerror"]),"CP"]
 prune1 = treegini1.loansacc$cptable[which.min(treegini1.loansacc$cptable[,"xerror"]),"CP"]
 
-# runt tree again
-treegini2.loansacc = rpart(fully_paid ~., data = loansacc, method = "class", parms = list(split = "gini"), control = rpart.control(minsplit = 10, minbucket = 3, cp = prune1))
+# run tree again
+treegini2.loansacc = rpart(fully_paid ~., data = loansacc.training, method = "class", parms = list(split = "gini"), control = rpart.control(minsplit = 10, minbucket = 3, cp = prune1))
 plot(treegini2.loansacc)
 text(treegini2.loansacc, pretty = 0)
 printcp(treegini2.loansacc)
@@ -187,10 +192,15 @@ plotcp(treegini2.loansacc)
 # prune the tree
 treegini2.loansacc$cptable[which.min(treegini2.loansacc$cptable[,"xerror"]),"CP"]
 
+#test the model
+predicted1 = predict(treegini2.loansacc, loansacc.testing, type = "class")
+confusion1 = table(loansacc.testing$fully_paid, predicted1)
+print(confusion1)
+
 #########
 
 ## create and show the tree
-treeinformation1.loansacc = rpart(fully_paid ~., data = loansacc, method = "class", parms = list(split = "information"), control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0001))
+treeinformation1.loansacc = rpart(fully_paid ~., data = loansacc.training, method = "class", parms = list(split = "information"), control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0001))
 plot(treeinformation1.loansacc)
 text(treeinformation1.loansacc, pretty = 0)
 printcp(treeinformation1.loansacc)
@@ -201,7 +211,7 @@ treeinformation1.loansacc$cptable[which.min(treeinformation1.loansacc$cptable[,"
 prune2 = treeinformation1.loansacc$cptable[which.min(treeinformation1.loansacc$cptable[,"xerror"]),"CP"]
 
 # runt tree again
-treeinformation2.loansacc = rpart(fully_paid ~., data = loansacc, method = "class", parms = list(split = "information"), control = rpart.control(minsplit = 10, minbucket = 3, cp = prune1))
+treeinformation2.loansacc = rpart(fully_paid ~., data = loansacc.training, method = "class", parms = list(split = "information"), control = rpart.control(minsplit = 10, minbucket = 3, cp = prune1))
 plot(treeinformation2.loansacc)
 text(treeinformation2.loansacc, pretty = 0)
 printcp(treeinformation2.loansacc)
@@ -210,4 +220,10 @@ plotcp(treeinformation2.loansacc)
 # prune the tree
 treeinformation2.loansacc$cptable[which.min(treeinformation2.loansacc$cptable[,"xerror"]),"CP"]
 
-#################### END OF SOME TREE ALGORITHMS ####################
+#test the model
+predicted2 = predict(treeinformation2.loansacc, loansacc.testing, type = "class")
+confusion2 = table(loansacc.testing$fully_paid, predicted2)
+print(confusion2)
+
+#################### RANDOMFOREST ####################
+
