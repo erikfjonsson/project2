@@ -163,23 +163,18 @@ loansacc$earliest_cr_line = NULL
 ## set the seed
 set.seed(1)
 
-## split the dataset
-training = sample(dim(loansacc)[1], dim(loansacc)[1]/2)
-loansacc.training = loansacc[training, ]
-loansacc.testing = loansacc[-training, ]
-
 #################### SOME TREE ALGORITHMS ####################
 
 ## create and show the tree
-tree1.loansacc = rpart(fully_paid ~ ., data = loansacc.training, method = "class", control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0006))
+tree1.loansacc = rpart(fully_paid ~ ., data = loansacc, method = "class", control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0006))
 plot(tree1.loansacc)
 text(tree1.loansacc, pretty = 0)
 printcp(tree1.loansacc)
 
-# ## create and show the tree
-# tree2.loansacc = tree(fully_paid ~ ., data = loansacc.training, method = "class")
-# summary(tree2.loansacc)
-# plot(tree2.loansacc)
-# text(tree2.loansacc, pretty = 0)
+#create and show the tree
+tree2.loansacc = tree(fully_paid ~ ., data = loansacc, method = "class", control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0006)
+summary(tree2.loansacc)
+plot(tree2.loansacc)
+text(tree2.loansacc, pretty = 0)
 
 #################### END OF SOME TREE ALGORITHMS ####################
