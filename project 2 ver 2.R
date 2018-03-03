@@ -211,7 +211,7 @@ treeinformation1.loansacc$cptable[which.min(treeinformation1.loansacc$cptable[,"
 prune2 = treeinformation1.loansacc$cptable[which.min(treeinformation1.loansacc$cptable[,"xerror"]),"CP"]
 
 # runt tree again
-treeinformation2.loansacc = rpart(fully_paid ~., data = loansacc.training, method = "class", parms = list(split = "information"), control = rpart.control(minsplit = 10, minbucket = 3, cp = prune1))
+treeinformation2.loansacc = rpart(fully_paid ~., data = loansacc.training, method = "class", parms = list(split = "information"), control = rpart.control(minsplit = 10, minbucket = 3, cp = prune2))
 plot(treeinformation2.loansacc)
 text(treeinformation2.loansacc, pretty = 0)
 printcp(treeinformation2.loansacc)
