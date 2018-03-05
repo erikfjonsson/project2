@@ -18,6 +18,7 @@ library(rpart)
 library(party)
 library(lubridate)
 library(ROCR)
+library(e1071)
 
 ## import data with accepted loans
 loansacc = read.csv("loans_accepted.csv", header=TRUE, sep=",", dec=".", stringsAsFactors = TRUE) #import data with accepted loans
@@ -158,6 +159,36 @@ loansacc$time_since_first_credit = as.numeric(loansacc$time_since_first_credit)
 loansacc$earliest_cr_line = NULL
 loansacc$issue_d = NULL
 
+# some transformations and dropping of old vars
+# log+1-transforming variables with range higher than 1000
+loansacc$log_annual_inc = log10(loansacc$annual_inc + 1)
+loansacc$annual_inc = NULL
+loansacc$log_loan_amnt = log10(loansacc$loan_amnt + 1)
+loansacc$loan_amnt = NULL
+loansacc$log_revol_bal = log10(loansacc$revol_bal + 1)
+loansacc$revol_bal = NULL
+loansacc$log_tot_cur_bal = log10(loansacc$tot_cur_bal + 1)
+loansacc$tot_cur_bal = NULL
+loansacc$log_total_rev_hi_lim = log10(loansacc$total_rev_hi_lim + 1)
+loansacc$total_rev_hi_lim = NULL
+loansacc$log_avg_cur_bal = log10(loansacc$avg_cur_bal + 1)
+loansacc$avg_cur_bal = NULL
+loansacc$log_bc_open_to_buy = log10(loansacc$bc_open_to_buy + 1)
+loansacc$bc_open_to_buy = NULL
+loansacc$log_deling_amnt = log10(loansacc$delinq_amnt + 1)
+loansacc$delinq_amnt = NULL
+loansacc$log_tot_hi_cred_lim = log10(loansacc$tot_hi_cred_lim + 1)
+loansacc$tot_hi_cred_lim = NULL
+loansacc$log_total_bal_ex_mort = log10(loansacc$total_bal_ex_mort + 1)
+loansacc$total_bal_ex_mort = NULL
+loansacc$log_total_bc_limit = log10(loansacc$total_bc_limit + 1)
+loansacc$total_bc_limit = NULL
+loansacc$log_total_il_high_credit_limit = log10(loansacc$total_il_high_credit_limit + 1)
+loansacc$total_il_high_credit_limit = NULL
+loansacc$log_time_since_first_credit = log10(loansacc$time_since_first_credit + 1)
+loansacc$time_since_first_credit = NULL
+
+
 ######################################################################
 
 #### start modelling
@@ -257,5 +288,6 @@ minauct = paste(c("min(AUC) = "), minauc, sep="")
 maxauct = paste(c("max(AUC) = "), maxauc, sep="")
 print(auc)
 
-#################### OTHER ML ####################
-
+#################### SUPORT VECTOR MACHINES ####################
+svm.loansacc = svm(fully_paid ~., data = loansacc.training)
+svm.loansacc.pred = predict(svm.loansacc, loansacc.testing, type="class")
