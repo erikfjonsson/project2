@@ -9,7 +9,7 @@
 getwd()
 
 #set working directory
-setwd("C:/Users/erikj/Documents/764 local files/project 2") 
+setwd("D:/Erik/Dokument/764 local files/project 2") 
 
 #get relevant libraries
 library(tree)
@@ -17,6 +17,7 @@ library(randomForest)
 library(rpart)
 library(party)
 library(lubridate)
+library(rocr)
 
 ## import data with accepted loans
 loansacc = read.csv("loans_accepted.csv", header=TRUE, sep=",", dec=".", stringsAsFactors = TRUE) #import data with accepted loans
@@ -227,3 +228,17 @@ print(confusion2)
 
 #################### RANDOMFOREST ####################
 
+# roughfix
+loansacc.training.roughfix = na.roughfix(loansacc.training)
+loansacc.testing.roughfix = na.roughfix(loansacc.testing)
+
+# create forest, plot forest and create prediction
+randforest.loansacc = randomForest(fully_paid ~., data = loansacc.training, mtry = 20, ntree = 250, importance = TRUE, na.action = na.roughfix)
+varImpPlot(randforest.loansacc)
+predicted.randforest = predict(randforest.loansacc, loansacc.testing)
+
+#evaluate
+confusion.rf = table(loansacc.testing$fully_paid, predicted.randforest)
+print(confusion.rf)
+
+#################### OTHER ML ####################
