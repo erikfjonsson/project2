@@ -19,6 +19,7 @@ library(party)
 library(lubridate)
 library(ROCR)
 library(e1071)
+library(leaps)
 
 ## import data with accepted loans
 loansacc = read.csv("loans_accepted.csv", header=TRUE, sep=",", dec=".", stringsAsFactors = TRUE) #import data with accepted loans
@@ -50,7 +51,6 @@ loansacc = loansacc[!(loansacc$application_type != "Individual"),]
 loansacc = loansacc[, -which(colMeans(is.na(loansacc)) > 0.2)]
 
 #drop some columns that are not needed because of redundancy or not possible to analyze
-loansacc$id = NULL
 loansacc$emp_title = NULL
 loansacc$desc = NULL
 loansacc$title = NULL
@@ -155,9 +155,8 @@ loansacc$earliest_cr_line = parse_date_time(loansacc$earliest_cr_line, "myd")
 loansacc$time_since_first_credit = loansacc$issue_d - loansacc$earliest_cr_line
 loansacc$time_since_first_credit = as.numeric(loansacc$time_since_first_credit)
 
-#drop earliest credit line and issue_d
+#drop earliest credit line
 loansacc$earliest_cr_line = NULL
-loansacc$issue_d = NULL
 
 # some transformations and dropping of old vars
 # log+1-transforming variables with range higher than 1000
@@ -188,6 +187,12 @@ loansacc$total_il_high_credit_limit = NULL
 loansacc$log_time_since_first_credit = log10(loansacc$time_since_first_credit + 1)
 loansacc$time_since_first_credit = NULL
 
+# copy the dataset for use in OLS task
+loansacc.ols = loansacc
+
+# drop issue_d and loan id
+loansacc$issue_d = NULL
+loansacc$id = NULL
 
 ######################################################################
 
@@ -288,6 +293,46 @@ minauct = paste(c("min(AUC) = "), minauc, sep="")
 maxauct = paste(c("max(AUC) = "), maxauc, sep="")
 print(auc)
 
+#################### OLS ####################
+
+# convert issue_d to year adn drop old var
+loansacc.ols$issue_d = substring(loansacc.ols$issue_d, 5, 9)
+loansacc.ols$year = as.factor(loansacc.ols$issue_d)
+loansacc.ols$issue_d = NULL
+
+# recode year into several dummies
+year. = factor(loansacc.ols$year)
+dummies_year = model.matrix(~year.)
+
+# recode term into dummy
+term. = factor(loansacc.ols$term)
+dummies_term = model.matrix(~term.)
+
+# recode emp_length into several dummies
+emp_length. = factor(loansacc.ols$emp_length)
+dummies_emp_length = model.matrix(~emp_length.)
+
+# recode home ownership into several dummies
+home_ownership. = factor(loansacc.ols$home_ownership)
+dummies_home_ownership = model.matrix(~home_ownership.)
+
+# recode verification status into several dummies
+verification_status. = factor(loansacc.ols$verification_status)
+dummies_verification_status = model.matrix(~verification_status.)
+
+# recode purpose into several dummies
+purpose. = factor(loansacc.ols$purpose)
+dummies_purpose = model.matrix(~purpose.)
+
+# recode state region into several dummies
+state_region. = factor(loansacc.ols$state_region)
+dummies_state_region = model.matrix(~state_region.)
+
+mergetest = merge(loansacc.ols, dummies_year, by = 0, all = TRUE)
+
+# run regression
+fit = lm(fully_paid ~ log_annual_inc , data = loansacc.ols)
+
 #################### SUPORT VECTOR MACHINES ####################
 svm.loansacc = svm(fully_paid ~., data = loansacc.training)
-svm.loansacc.pred = predict(svm.loansacc, loansacc.testing, type="class")
+svm.loansacc.pred = predict(svm.loansacc,loansacc.testing,type="class")
