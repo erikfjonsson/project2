@@ -212,8 +212,8 @@ auc.gini = performance(rocr.gini,"auc")
 auc.gini = unlist(slot(auc.gini, "y.values"))
 minauc.gini = min(round(auc.gini, digits = 2))
 maxauc.gini = max(round(auc.gini, digits = 2))
-minauct.gini = paste(c("min(AUC) = "), minauc,sep="")
-maxauct.gini = paste(c("max(AUC) = "), maxauc,sep="")
+minauct.gini = paste(c("min(AUC) = "), minauc.gini, sep="")
+maxauct.gini = paste(c("max(AUC) = "), maxauc.gini, sep="")
 print(auc.gini)
 
 #################### RANDOMFOREST ####################
@@ -245,7 +245,7 @@ rocr.randforest = prediction(predicted.randforest.prob, loansacc.testing$fully_p
 rocr.randforest.perf = performance(rocr.randforest, "tpr", "fpr")
 
 # plot the rocr curve
-plot(randforest.loansacc.perf, main="ROC Curve for Random Forest", col=2, lwd=2)
+plot(rocr.randforest.perf, main="ROC Curve for Random Forest", col=2, lwd=2)
 abline(a=0, b=1, lwd=2, lty=2, col="gray")
 
 # compute area under rocr curve
@@ -253,8 +253,8 @@ auc = performance(rocr.randforest,"auc")
 auc = unlist(slot(auc, "y.values"))
 minauc = min(round(auc, digits = 2))
 maxauc = max(round(auc, digits = 2))
-minauct = paste(c("min(AUC) = "), minauc,sep="")
-maxauct = paste(c("max(AUC) = "), maxauc,sep="")
+minauct = paste(c("min(AUC) = "), minauc, sep="")
+maxauct = paste(c("max(AUC) = "), maxauc, sep="")
 print(auc)
 
 #################### OTHER ML ####################
