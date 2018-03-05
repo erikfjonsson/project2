@@ -51,6 +51,7 @@ loansacc = loansacc[!(loansacc$application_type != "Individual"),]
 loansacc = loansacc[, -which(colMeans(is.na(loansacc)) > 0.2)]
 
 #drop some columns that are not needed because of redundancy or not possible to analyze
+loansacc$id = NULL
 loansacc$emp_title = NULL
 loansacc$desc = NULL
 loansacc$title = NULL
@@ -142,9 +143,10 @@ loansacc$addr_state = NULL
 loansacc$state_region = as.factor(loansacc$state_region)
 
 # convert issue_d to date
-loansacc$issue_d = as.character(loansacc$issue_d)
-loansacc$issue_d = paste(loansacc$issue_d, "-01", sep = "")
-loansacc$issue_d = parse_date_time(loansacc$issue_d, "myd")
+loansacc$issue_d_2 = loansacc$issue_d
+loansacc$issue_d_2 = as.character(loansacc$issue_d_2)
+loansacc$issue_d_2 = paste(loansacc$issue_d_2, "-01", sep = "")
+loansacc$issue_d_2 = parse_date_time(loansacc$issue_d_2, "myd")
 
 # convert earliest credit line to date
 loansacc$earliest_cr_line = as.character(loansacc$earliest_cr_line)
@@ -152,7 +154,7 @@ loansacc$earliest_cr_line = paste(loansacc$earliest_cr_line, "-01", sep = "")
 loansacc$earliest_cr_line = parse_date_time(loansacc$earliest_cr_line, "myd")
 
 # create variable for time since earliest credit line and convert to numeric
-loansacc$time_since_first_credit = loansacc$issue_d - loansacc$earliest_cr_line
+loansacc$time_since_first_credit = loansacc$issue_d_2 - loansacc$earliest_cr_line
 loansacc$time_since_first_credit = as.numeric(loansacc$time_since_first_credit)
 
 #drop earliest credit line
@@ -190,9 +192,9 @@ loansacc$time_since_first_credit = NULL
 # copy the dataset for use in OLS task
 loansacc.ols = loansacc
 
-# drop issue_d and loan id
+# drop issue_d
 loansacc$issue_d = NULL
-loansacc$id = NULL
+loansacc$issue_d_2 = NULL
 
 ######################################################################
 
@@ -295,43 +297,21 @@ print(auc)
 
 #################### OLS ####################
 
-# convert issue_d to year adn drop old var
+# convert issue_d to year and drop old var
 loansacc.ols$issue_d = substring(loansacc.ols$issue_d, 5, 9)
 loansacc.ols$year = as.factor(loansacc.ols$issue_d)
 loansacc.ols$issue_d = NULL
 
-# recode year into several dummies
-year. = factor(loansacc.ols$year)
-dummies_year = model.matrix(~year.)
+# recode fully_paid into integer dummy
+loansacc.ols$fully_paid_int = ifelse(loansacc.ols$fully_paid == "fully_paid", 1, ifelse(loansacc.ols$fully_paid == "default", 0, 0))
 
-# recode term into dummy
-term. = factor(loansacc.ols$term)
-dummies_term = model.matrix(~term.)
-
-# recode emp_length into several dummies
-emp_length. = factor(loansacc.ols$emp_length)
-dummies_emp_length = model.matrix(~emp_length.)
-
-# recode home ownership into several dummies
-home_ownership. = factor(loansacc.ols$home_ownership)
-dummies_home_ownership = model.matrix(~home_ownership.)
-
-# recode verification status into several dummies
-verification_status. = factor(loansacc.ols$verification_status)
-dummies_verification_status = model.matrix(~verification_status.)
-
-# recode purpose into several dummies
-purpose. = factor(loansacc.ols$purpose)
-dummies_purpose = model.matrix(~purpose.)
-
-# recode state region into several dummies
-state_region. = factor(loansacc.ols$state_region)
-dummies_state_region = model.matrix(~state_region.)
-
-mergetest = merge(loansacc.ols, dummies_year, by = 0, all = TRUE)
+##split dataset
+training.ols = sample(dim(loansacc.ols)[1], dim(loansacc.ols)[1]/2)
+loansacc.training.ols = loansacc.ols[training.ols, ]
+loansacc.testing.ols = loansacc.ols[-training.ols, ]
 
 # run regression
-fit = lm(fully_paid ~ log_annual_inc , data = loansacc.ols)
+fit = lm(fully_paid_int ~ log_annual_inc + year + term + emp_length + home_ownership + verification_status + purpose + state_region, data = loansacc.training.ols, x = TRUE)
 
 #################### SUPORT VECTOR MACHINES ####################
 svm.loansacc = svm(fully_paid ~., data = loansacc.training)
