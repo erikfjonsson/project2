@@ -17,7 +17,7 @@ library(randomForest)
 library(rpart)
 library(party)
 library(lubridate)
-library(rocr)
+library(ROCR)
 
 ## import data with accepted loans
 loansacc = read.csv("loans_accepted.csv", header=TRUE, sep=",", dec=".", stringsAsFactors = TRUE) #import data with accepted loans
@@ -232,13 +232,27 @@ print(confusion2)
 loansacc.training.roughfix = na.roughfix(loansacc.training)
 loansacc.testing.roughfix = na.roughfix(loansacc.testing)
 
-# create forest, plot forest and create prediction
+# create forest, plot forest
 randforest.loansacc = randomForest(fully_paid ~., data = loansacc.training, mtry = 20, ntree = 250, importance = TRUE, na.action = na.roughfix)
 varImpPlot(randforest.loansacc)
+plot(randforest.loansacc)
+legend("center", colnames(randforest.loansacc$err.rate),col=1:4,cex=0.8,fill=1:4)
+
+# predict and plot
 predicted.randforest = predict(randforest.loansacc, loansacc.testing)
 
 #evaluate
 confusion.rf = table(loansacc.testing$fully_paid, predicted.randforest)
 print(confusion.rf)
 
+# predict
+predicted.randforest.prob = predict(randforest.loansacc, type = "prob" , loansacc.testing)[,2]
+rocr.randforest = prediction(predicted.randforest.prob, loansacc.testing$fully_paid)
+rocr.randforest.perf = performance(rocr.randforest, "tpr", "fpr")
+
+# plot
+plot(randforest.loansacc.perf, main="ROC Curve for Random Forest", col=2, lwd=2)
+abline(a=0, b=1, lwd=2, lty=2, col="gray")
+
 #################### OTHER ML ####################
+
