@@ -198,33 +198,23 @@ predicted1 = predict(treegini2.loansacc, loansacc.testing, type = "class")
 confusion1 = table(loansacc.testing$fully_paid, predicted1)
 print(confusion1)
 
-#########
+# calculate rocr curve
+predicted.gini.prob = predict(treegini2.loansacc, type = "prob" , loansacc.testing)[,2]
+rocr.gini = prediction(predicted.gini.prob, loansacc.testing$fully_paid)
+rocr.gini.perf = performance(rocr.gini, "tpr", "fpr")
 
-## create and show the tree
-treeinformation1.loansacc = rpart(fully_paid ~., data = loansacc.training, method = "class", parms = list(split = "information"), control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0001))
-plot(treeinformation1.loansacc)
-text(treeinformation1.loansacc, pretty = 0)
-printcp(treeinformation1.loansacc)
-plotcp(treeinformation1.loansacc)
+# plot the rocr curve
+plot(rocr.gini.perf, main="ROC Curve for gini tree", col=2, lwd=2)
+abline(a=0, b=1, lwd=2, lty=2, col="gray")
 
-# prune the tree
-treeinformation1.loansacc$cptable[which.min(treeinformation1.loansacc$cptable[,"xerror"]),"CP"]
-prune2 = treeinformation1.loansacc$cptable[which.min(treeinformation1.loansacc$cptable[,"xerror"]),"CP"]
-
-# runt tree again
-treeinformation2.loansacc = rpart(fully_paid ~., data = loansacc.training, method = "class", parms = list(split = "information"), control = rpart.control(minsplit = 10, minbucket = 3, cp = prune2))
-plot(treeinformation2.loansacc)
-text(treeinformation2.loansacc, pretty = 0)
-printcp(treeinformation2.loansacc)
-plotcp(treeinformation2.loansacc)
-
-# prune the tree
-treeinformation2.loansacc$cptable[which.min(treeinformation2.loansacc$cptable[,"xerror"]),"CP"]
-
-#test the model
-predicted2 = predict(treeinformation2.loansacc, loansacc.testing, type = "class")
-confusion2 = table(loansacc.testing$fully_paid, predicted2)
-print(confusion2)
+# compute area under rocr curve
+auc.gini = performance(rocr.gini,"auc")
+auc.gini = unlist(slot(auc.gini, "y.values"))
+minauc.gini = min(round(auc.gini, digits = 2))
+maxauc.gini = max(round(auc.gini, digits = 2))
+minauct.gini = paste(c("min(AUC) = "), minauc,sep="")
+maxauct.gini = paste(c("max(AUC) = "), maxauc,sep="")
+print(auc.gini)
 
 #################### RANDOMFOREST ####################
 
@@ -232,27 +222,40 @@ print(confusion2)
 loansacc.training.roughfix = na.roughfix(loansacc.training)
 loansacc.testing.roughfix = na.roughfix(loansacc.testing)
 
-# create forest, plot forest
+# create forest
 randforest.loansacc = randomForest(fully_paid ~., data = loansacc.training, mtry = 20, ntree = 250, importance = TRUE, na.action = na.roughfix)
-varImpPlot(randforest.loansacc)
+
+# plot forest - error vs no of trees
 plot(randforest.loansacc)
 legend("center", colnames(randforest.loansacc$err.rate),col=1:4,cex=0.8,fill=1:4)
 
-# predict and plot
+# plot forest - variable importance
+varImpPlot(randforest.loansacc)
+
+# make predcition for test data based on model
 predicted.randforest = predict(randforest.loansacc, loansacc.testing)
 
-#evaluate
+#evaluate with confusion matrix
 confusion.rf = table(loansacc.testing$fully_paid, predicted.randforest)
 print(confusion.rf)
 
-# predict
+# calculate rocr curve
 predicted.randforest.prob = predict(randforest.loansacc, type = "prob" , loansacc.testing)[,2]
 rocr.randforest = prediction(predicted.randforest.prob, loansacc.testing$fully_paid)
 rocr.randforest.perf = performance(rocr.randforest, "tpr", "fpr")
 
-# plot
+# plot the rocr curve
 plot(randforest.loansacc.perf, main="ROC Curve for Random Forest", col=2, lwd=2)
 abline(a=0, b=1, lwd=2, lty=2, col="gray")
+
+# compute area under rocr curve
+auc = performance(rocr.randforest,"auc")
+auc = unlist(slot(auc, "y.values"))
+minauc = min(round(auc, digits = 2))
+maxauc = max(round(auc, digits = 2))
+minauct = paste(c("min(AUC) = "), minauc,sep="")
+maxauct = paste(c("max(AUC) = "), maxauc,sep="")
+print(auc)
 
 #################### OTHER ML ####################
 
