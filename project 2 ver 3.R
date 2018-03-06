@@ -20,6 +20,7 @@ library(ROCR)
 library(party)
 library(e1071)
 library(leaps)
+library(MASS)
 
 ## import data with accepted loans
 loansacc = read.csv("loans_accepted.csv", header=TRUE, sep=",", dec=".", stringsAsFactors = TRUE) #import data with accepted loans
@@ -393,3 +394,19 @@ maxauc.svm = max(round(auc.svm, digits = 2))
 minauct.svm = paste(c("min(AUC) = "), minauc.svm, sep="")
 maxauct.svm = paste(c("max(AUC) = "), maxauc.svm, sep="")
 print(auc.svm)
+
+#################### SUPPORT VECTOR MACHINES V2 ####################
+
+svm2.loansacc = loansacc
+
+ind = sapply(svm2.loansacc, is.numeric)
+svm2.loansacc[ind] = lapply(svm2.loansacc[ind], scale)
+
+#split dataset
+svm2.training = sample(dim(svm2.loansacc)[1], dim(svm2.loansacc)[1]/2)
+svm2.loansacc.training = svm2.loansacc[svm2.training, ]
+svm2.loansacc.testing = svm2.loansacc[-svm2.training, ]
+
+svm2.loansacc = svm(fully_paid ~., data = svm2.loansacc.training)
+
+svm2.loansacc.pred = predict(svm2.loansacc, svm2.loansacc.testing, type="class")
