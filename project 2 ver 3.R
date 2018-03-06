@@ -340,25 +340,56 @@ g = nrow(loansacc.testing.ols) - length(pred)
 g = as.numeric(g)
 loansacc.testing.ols = loansacc.testing.ols[-sample(1:nrow(loansacc.testing.ols), g), ]
 
-mean((pred - loansacc.testing.ols$fully_paid_int)^2)
+#calculate rmse
+sqrt(mean((pred - loansacc.testing.ols$fully_paid_int)^2))
 
 #################### SUPPORT VECTOR MACHINES ####################
 
+#create data frame for svm part
+loansacc.svm = loansacc
+
 #draw sample
-loansacc.svm.sample = loansacc[sample(nrow(loansacc), 15000),]
+loansacc.svm.sample = loansacc.svm[sample(nrow(loansacc), 25000),]
 
 loansacc.svm.sample = na.omit(loansacc.svm.sample)
 
 # split data
 svm.training = sample(dim(loansacc.svm.sample)[1], dim(loansacc.svm.sample)[1]/2)
-loansacc.svm.training = loansacc.svm.sample[training, ]
-loansacc.svm.testing = loansacc.svm.sample[-training, ]
+loansacc.svm.training = loansacc.svm.sample[svm.training, ]
+loansacc.svm.testing = loansacc.svm.sample[-svm.training, ]
 
 #remove columns with only 1 unique values
 keep1 = apply(loansacc.svm.training[1:57], 1, function(x) length(unique(x[!is.na(x)])) != 1)
-loansacc.svm.training = loansacc.svm.training[keep, ]
+loansacc.svm.training = loansacc.svm.training[keep1, ]
 keep2 = apply(loansacc.svm.testing[1:57], 1, function(x) length(unique(x[!is.na(x)])) != 1)
-loansacc.svm.testing = loansacc.svm.testing[keep, ]
+loansacc.svm.testing = loansacc.svm.testing[keep2, ]
 
 #run model
 svm.loansacc = svm(fully_paid ~., data = loansacc.svm.training)
+
+# make predictions
+pred.svm = predict(svm.loansacc, loansacc.svm.testing)
+
+#evaluate with confusion matrix
+confusion.svm = table(loansacc.svm.testing$fully_paid, pred.svm)
+print(confusion.svm)
+
+# calculate rocr curve
+predicted.svm = predict(svm.loansacc, type = "prob", loansacc.svm.testing)
+predicted.svm = as.data.frame(predicted.svm)
+predicted.svm$predicted.svm = as.numeric(predicted.svm$predicted.svm)
+rocr.svm = prediction(predicted.svm, loansacc.svm.testing$fully_paid)
+rocr.svm.perf = performance(rocr.svm, "tpr", "fpr")
+
+# plot the rocr curve
+plot(rocr.svm.perf, main="ROC Curve for SVM", col=2, lwd=2)
+abline(a=0, b=1, lwd=2, lty=2, col="gray")
+
+# compute area under rocr curve
+auc.svm = performance(rocr.svm,"auc")
+auc.svm = unlist(slot(auc.svm, "y.values"))
+minauc.svm = min(round(auc.svm, digits = 2))
+maxauc.svm = max(round(auc.svm, digits = 2))
+minauct.svm = paste(c("min(AUC) = "), minauc.svm, sep="")
+maxauct.svm = paste(c("max(AUC) = "), maxauc.svm, sep="")
+print(auc.svm)
