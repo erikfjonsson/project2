@@ -421,13 +421,9 @@ svm2.loansacc$verified[svm2.loansacc$verification_status == "Not Verified" ] = "
 svm2.loansacc$verified = as.factor(svm2.loansacc$verified)
 svm2.loansacc$verification_status = NULL
 
-
-
 #split dataset
 svm2.training = sample(dim(svm2.loansacc)[1], dim(svm2.loansacc)[1]/2)
 svm2.loansacc.training = svm2.loansacc[svm2.training, ]
 svm2.loansacc.testing = svm2.loansacc[-svm2.training, ]
 
 svm2.loansacc = svm(fully_paid ~., data = svm2.loansacc.training)
-
-svm2.loansacc.pred = predict(svm2.loansacc, svm2.loansacc.testing, type="class")
