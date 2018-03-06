@@ -334,10 +334,13 @@ loansacc.netw = loansacc
 ## some data cleaning
 
 # some numerical transofrmations
+loansacc.netw$fully_paid = as.numeric(loansacc.netw$fully_paid)
+loansacc.netw$fully_paid = loansacc.netw$fully_paid - 1
+
 loansacc.netw$term_60m[loansacc.netw$term == "60 months" ] = 1
 loansacc.netw$term_60m[loansacc.netw$term != "60 months" ] = 0
 loansacc.netw$term_60m = as.numeric(loansacc.netw$term_60m)
-loansacc.netw$emp_length = NULL
+loansacc.netw$term = NULL
 
 loansacc.netw$emp_ovr10[loansacc.netw$emp_length == "10+ years" ] = 1
 loansacc.netw$emp_ovr10[loansacc.netw$emp_length != "10+ years" ] = 0
@@ -362,7 +365,7 @@ loansacc.netw$purpose = NULL # we would like to keep this by recoding it but the
 loansacc.netw = as.matrix(loansacc.netw)
 
 # normalize
-loansacc.netw = normalize(loansacc.netw[,3:52])
+loansacc.netw[,2:52] = normalize(loansacc.netw[,2:52])
 
 #create training and test data
 samp = sample(2, nrow(loansacc.netw), replace=TRUE, prob = c(0.5, 0.5))
