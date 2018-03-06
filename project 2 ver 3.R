@@ -399,8 +399,29 @@ print(auc.svm)
 
 svm2.loansacc = loansacc
 
-ind = sapply(svm2.loansacc, is.numeric)
-svm2.loansacc[ind] = lapply(svm2.loansacc[ind], scale)
+## some data cleaning
+
+# normalize numeric variables
+ind2 = sapply(svm2.loansacc, is.numeric)
+svm2.loansacc[ind2] = lapply(svm2.loansacc[ind2], scale)
+
+# some reductions in factor levels
+svm2.loansacc$emp_ovr10[svm2.loansacc$emp_length == "10+ years" ] = "10+"
+svm2.loansacc$emp_ovr10[svm2.loansacc$emp_length != "10+ years" ] = "10-"
+svm2.loansacc$emp_ovr10 = as.factor(svm2.loansacc$emp_ovr10)
+svm2.loansacc$emp_length = NULL
+
+svm2.loansacc$rent[svm2.loansacc$home_ownership == "RENT" ] = "rent"
+svm2.loansacc$rent[svm2.loansacc$home_ownership != "RENT" ] = "not_rent"
+svm2.loansacc$rent = as.factor(svm2.loansacc$rent)
+svm2.loansacc$home_ownership = NULL
+
+svm2.loansacc$verified[svm2.loansacc$verification_status != "Not Verified" ] = "verified"
+svm2.loansacc$verified[svm2.loansacc$verification_status == "Not Verified" ] = "not_verified"
+svm2.loansacc$verified = as.factor(svm2.loansacc$verified)
+svm2.loansacc$verification_status = NULL
+
+
 
 #split dataset
 svm2.training = sample(dim(svm2.loansacc)[1], dim(svm2.loansacc)[1]/2)
