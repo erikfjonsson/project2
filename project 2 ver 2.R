@@ -20,6 +20,11 @@ library(lubridate)
 library(ROCR)
 library(e1071)
 library(leaps)
+library(keras)
+library(tensorflow)
+library(devtools)
+
+# devtools::install_github("rstudio/keras")
 
 ## import data with accepted loans
 loansacc = read.csv("loans_accepted.csv", header=TRUE, sep=",", dec=".", stringsAsFactors = TRUE) #import data with accepted loans
@@ -313,6 +318,19 @@ loansacc.testing.ols = loansacc.ols[-training.ols, ]
 # run regression
 fit = lm(fully_paid_int ~ log_annual_inc + year + term + emp_length + home_ownership + verification_status + purpose + state_region, data = loansacc.training.ols, x = TRUE)
 
-#################### SUPORT VECTOR MACHINES ####################
-svm.loansacc = svm(fully_paid ~., data = loansacc.training)
-svm.loansacc.pred = predict(svm.loansacc,loansacc.testing,type="class")
+#################### NEURAL NETWORKS ####################
+
+# create matrix version of loansacc dataset and remove column names
+loansacc.matrix = as.matrix(sapply(loansacc, as.numeric))
+dimnames(loansacc.matrix) = NULL
+
+# create training and testing data
+samp = sample(2, nrow(loansacc.matrix), replace=TRUE, prob = c(0.5, 0.5))
+loansacc.netw.training = loansacc.matrix[samp == 1, 1:59]
+loansacc.netw.training = loansacc.matrix[samp == 2, 1:59]
+loansacc.netw.training.target = loansacc.matrix[samp == 1, 45]
+loansacc.netw.testing.target = loansacc.matrix[samp == 2, 45]
+
+# "One hot encoding", make matrix categorical
+loansacc.netw.training.target.labels = to_categorical(loansacc.netw.training.target)
+loansacc.netw.testing.target.labels = to_categorical(loansacc.netw.testing.target)
