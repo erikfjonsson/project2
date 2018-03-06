@@ -265,7 +265,7 @@ loansacc.training.roughfix = na.roughfix(loansacc.training)
 loansacc.testing.roughfix = na.roughfix(loansacc.testing)
 
 # create forest
-randforest.loansacc = randomForest(fully_paid ~., data = loansacc.training, mtry = 20, ntree = 250, importance = TRUE, na.action = na.roughfix)
+randforest.loansacc = randomForest(fully_paid ~., data = loansacc.training, mtry = 25, ntree = 400, importance = TRUE, na.action = na.roughfix)
 
 # plot forest - error vs no of trees
 plot(randforest.loansacc)
@@ -349,7 +349,7 @@ sqrt(mean((pred - loansacc.testing.ols$fully_paid_int)^2))
 loansacc.svm = loansacc
 
 #draw sample
-loansacc.svm.sample = loansacc.svm[sample(nrow(loansacc), 25000),]
+loansacc.svm.sample = loansacc.svm[sample(nrow(loansacc), 75000),]
 
 loansacc.svm.sample = na.omit(loansacc.svm.sample)
 
