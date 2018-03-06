@@ -15,11 +15,8 @@ setwd("D:/Erik/Dokument/764 local files/project 2")
 library(tree)
 library(randomForest)
 library(rpart)
-library(party)
 library(lubridate)
 library(ROCR)
-library(e1071)
-library(leaps)
 
 ## import data with accepted loans
 loansacc = read.csv("loans_accepted.csv", header=TRUE, sep=",", dec=".", stringsAsFactors = TRUE) #import data with accepted loans
@@ -297,6 +294,10 @@ print(auc)
 
 #################### OLS ####################
 
+library(party)
+library(e1071)
+library(leaps)
+
 # convert issue_d to year and drop old var
 loansacc.ols$issue_d = substring(loansacc.ols$issue_d, 5, 9)
 loansacc.ols$year = as.factor(loansacc.ols$issue_d)
@@ -315,20 +316,24 @@ fit = lm(fully_paid_int ~ log_annual_inc + year + term + emp_length + home_owner
 
 #################### NEURAL NETWORKS ####################
 
-# devtools::install_github("rstudio/keras")
+library(devtools)
+
+devtools::install_github("rstudio/keras")
 
 library(keras)
 library(tensorflow)
-library(devtools)
+
+install_keras()
+install_tensorflow()
 
 #create dataset specifically for neural network part
 loansacc.netw = loansacc
 
 # create matrix version of loansacc dataset
 loansacc.netw[,1] = as.numeric(loansacc.netw[,1]) - 1
-loansacc.netw = as.matrix(loansacc.netw)
+loansacc.netw = as.matrix(sapply(loansacc.netw, as.numeric))
 
-# create training and testing data
+#create training and test data
 samp = sample(2, nrow(loansacc.netw), replace=TRUE, prob = c(0.5, 0.5))
 loansacc.netw.training = loansacc.netw[samp == 1, 1:59]
 loansacc.netw.testing = loansacc.netw[samp == 2, 1:59]
@@ -341,7 +346,7 @@ loansacc.netw.testing.target.labels = to_categorical(loansacc.netw.testing.targe
 
 # construct the model
 model.netw = keras_model_sequential()
-model.netw %>% layer_dense(units = 8, activation = 'relu', input_shape = c(58)) %>% layer_dense(units = 57, activation = 'softmax')
+model.netw %>% layer_dense(units = 8, activation = 'relu', input_shape = c(59)) %>% layer_dense(units = 2, activation = 'softmax')
 
 # compile and fit model
 model.netw %>% compile(loss = 'binary_crossentropy', optimizer = 'adam', metrics = 'accuracy')
