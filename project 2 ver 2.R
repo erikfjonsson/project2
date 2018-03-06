@@ -20,11 +20,6 @@ library(lubridate)
 library(ROCR)
 library(e1071)
 library(leaps)
-library(keras)
-library(tensorflow)
-library(devtools)
-
-# devtools::install_github("rstudio/keras")
 
 ## import data with accepted loans
 loansacc = read.csv("loans_accepted.csv", header=TRUE, sep=",", dec=".", stringsAsFactors = TRUE) #import data with accepted loans
@@ -43,9 +38,6 @@ loansacc$verification_status_joint[loansacc$verification_status_joint == ""] = N
 
 # drop observations where loan_status is unknown
 loansacc = loansacc[!(loansacc$loan_status == ""),]
-
-# # drop observations from 2007
-# loansacc = loansacc[!(substring(loansacc$issue_d, 5, 9) == "2007"),]
 
 # drop joint loans
 loansacc = loansacc[!(loansacc$application_type != "Individual"),]
@@ -121,6 +113,9 @@ loansacc = loansacc[!(loansacc$fully_paid == "ongoing"),]
 
 # convert the recoded status variable to factor
 loansacc$fully_paid = as.factor(loansacc$fully_paid)
+
+#move status variable to first place
+loansacc = loansacc[,c(60,1:59)]
 
 # create recoded version of the state variable accordning to regions and drop old variable, convert to factor
 Pacific = c("WA", "OR", "CA", "AK", "HI")
@@ -320,17 +315,36 @@ fit = lm(fully_paid_int ~ log_annual_inc + year + term + emp_length + home_owner
 
 #################### NEURAL NETWORKS ####################
 
-# create matrix version of loansacc dataset and remove column names
-loansacc.matrix = as.matrix(sapply(loansacc, as.numeric))
-dimnames(loansacc.matrix) = NULL
+# devtools::install_github("rstudio/keras")
+
+library(keras)
+library(tensorflow)
+library(devtools)
+
+#create dataset specifically for neural network part
+loansacc.netw = loansacc
+
+# create matrix version of loansacc dataset
+loansacc.netw[,1] = as.numeric(loansacc.netw[,1]) - 1
+loansacc.netw = as.matrix(loansacc.netw)
 
 # create training and testing data
-samp = sample(2, nrow(loansacc.matrix), replace=TRUE, prob = c(0.5, 0.5))
-loansacc.netw.training = loansacc.matrix[samp == 1, 1:59]
-loansacc.netw.training = loansacc.matrix[samp == 2, 1:59]
-loansacc.netw.training.target = loansacc.matrix[samp == 1, 45]
-loansacc.netw.testing.target = loansacc.matrix[samp == 2, 45]
+samp = sample(2, nrow(loansacc.netw), replace=TRUE, prob = c(0.5, 0.5))
+loansacc.netw.training = loansacc.netw[samp == 1, 1:59]
+loansacc.netw.testing = loansacc.netw[samp == 2, 1:59]
+loansacc.netw.training.target = loansacc.netw[samp == 1, 1]
+loansacc.netw.testing.target = loansacc.netw[samp == 2, 1]
 
 # "One hot encoding", make matrix categorical
 loansacc.netw.training.target.labels = to_categorical(loansacc.netw.training.target)
 loansacc.netw.testing.target.labels = to_categorical(loansacc.netw.testing.target)
+
+# construct the model
+model.netw = keras_model_sequential()
+model.netw %>% layer_dense(units = 8, activation = 'relu', input_shape = c(58)) %>% layer_dense(units = 57, activation = 'softmax')
+
+# compile and fit model
+model.netw %>% compile(loss = 'binary_crossentropy', optimizer = 'adam', metrics = 'accuracy')
+
+# fit the model
+model.netw %>% fit(loansacc.netw.training, loansacc.netw.training.target.labels, epochs = 200, batch_size = 5, validation_split = 0,2)
