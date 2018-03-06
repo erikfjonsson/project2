@@ -380,10 +380,10 @@ loansacc.netw.testing.target.labels = to_categorical(loansacc.netw.testing.targe
 
 # construct the model
 model.netw = keras_model_sequential()
-model.netw %>% layer_dense(units = 25, activation = 'relu', input_shape = c(55)) %>% layer_dense(units = 2, activation = 'softmax')
+model.netw %>% layer_dense(units = 50, activation = 'relu', input_shape = c(55)) %>% layer_dense(units = 2, activation = 'softmax')
 
 # compile and fit model
 model.netw %>% compile(loss = 'binary_crossentropy', optimizer = 'adam', metrics = 'accuracy')
 
 # fit the model, store the model
-history = model.netw %>% fit(loansacc.netw.training, loansacc.netw.training.target.labels, epochs = 20, batch_size = 5, validation_split = 0,2)
+history = model.netw %>% fit(loansacc.netw.training, loansacc.netw.training.target.labels, epochs = 20, batch_size = 50, validation_split = 0,2)
