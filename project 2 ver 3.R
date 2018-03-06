@@ -94,6 +94,8 @@ loansacc$debt_settlement_flag = NULL
 loansacc$debt_settlement_flag_date = NULL
 loansacc$settlement_status = NULL
 loansacc$settlement_date = NULL
+
+# drop some columns with only one unique value
 loansacc$disbursement_method = NULL
 loansacc$application_type = NULL
 
@@ -307,18 +309,43 @@ loansacc.ols$issue_d = NULL
 # recode fully_paid into integer dummy
 loansacc.ols$fully_paid_int = ifelse(loansacc.ols$fully_paid == "fully_paid", 1, ifelse(loansacc.ols$fully_paid == "default", 0, 0))
 
-##split dataset
+#split dataset
 training.ols = sample(dim(loansacc.ols)[1], dim(loansacc.ols)[1]/2)
 loansacc.training.ols = loansacc.ols[training.ols, ]
 loansacc.testing.ols = loansacc.ols[-training.ols, ]
 
 # run regression
-fit = lm(fully_paid_int ~ log_annual_inc + year + term + emp_length + home_ownership + verification_status + purpose + state_region, data = loansacc.training.ols, x = TRUE)
+fit1 = lm(fully_paid_int ~ log_annual_inc + year + term + emp_length + home_ownership + purpose + verification_status + state_region, data = loansacc.training.ols, x = TRUE)
+
+# recode home_ownership into rent-dummy-variable
+loansacc.ols$rent[loansacc.ols$home_ownership == "RENT" ] = "rent"
+loansacc.ols$rent[loansacc.ols$home_ownership != "RENT" ] = "not_rent"
+loansacc.ols$rent = as.factor(loansacc.ols$rent)
+loansacc.ols$home_ownership = NULL
+
+#split the dataset again
+training.ols = sample(dim(loansacc.ols)[1], dim(loansacc.ols)[1]/2)
+loansacc.training.ols = loansacc.ols[training.ols, ]
+loansacc.testing.ols = loansacc.ols[-training.ols, ]
+
+# run regression again
+fit2 = lm(fully_paid_int ~ log_annual_inc + year + term + emp_length + verification_status + purpose + state_region + rent, data = loansacc.training.ols, x = TRUE)
+
+# make predictions based on test data and omit NAs
+pred = predict(fit2, loansacc.testing.ols)
+pred = na.omit(pred)
+
+# trim the testing data to be of same number of rows as predicted data
+g = nrow(loansacc.testing.ols) - length(pred)
+g = as.numeric(g)
+loansacc.testing.ols = loansacc.testing.ols[-sample(1:nrow(loansacc.testing.ols), g), ]
+
+mean((pred - loansacc.testing.ols$fully_paid_int)^2)
 
 #################### SUPPORT VECTOR MACHINES ####################
 
 #draw sample
-loansacc.svm.sample = loansacc[sample(nrow(loansacc), 10000),]
+loansacc.svm.sample = loansacc[sample(nrow(loansacc), 15000),]
 
 loansacc.svm.sample = na.omit(loansacc.svm.sample)
 
