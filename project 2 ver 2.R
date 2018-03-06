@@ -91,6 +91,8 @@ loansacc$debt_settlement_flag = NULL
 loansacc$debt_settlement_flag_date = NULL
 loansacc$settlement_status = NULL
 loansacc$settlement_date = NULL
+loansacc$disbursement_method = NULL
+loansacc$application_type = NULL
 
 ## clean the data further
 
@@ -112,7 +114,7 @@ loansacc = loansacc[!(loansacc$fully_paid == "ongoing"),]
 loansacc$fully_paid = as.factor(loansacc$fully_paid)
 
 #move status variable to first place
-loansacc = loansacc[,c(60,1:59)]
+loansacc = loansacc[,c(58,1:57)]
 
 # create recoded version of the state variable accordning to regions and drop old variable, convert to factor
 Pacific = c("WA", "OR", "CA", "AK", "HI")
@@ -329,14 +331,43 @@ install_tensorflow()
 #create dataset specifically for neural network part
 loansacc.netw = loansacc
 
-# create matrix version of loansacc dataset
-loansacc.netw[,1] = as.numeric(loansacc.netw[,1]) - 1
-loansacc.netw = as.matrix(sapply(loansacc.netw, as.numeric))
+## some data cleaning
+
+# some numerical transofrmations
+loansacc.netw$term_60m[loansacc.netw$term == "60 months" ] = 1
+loansacc.netw$term_60m[loansacc.netw$term != "60 months" ] = 0
+loansacc.netw$term_60m = as.numeric(loansacc.netw$term_60m)
+loansacc.netw$emp_length = NULL
+
+loansacc.netw$emp_ovr10[loansacc.netw$emp_length == "10+ years" ] = 1
+loansacc.netw$emp_ovr10[loansacc.netw$emp_length != "10+ years" ] = 0
+loansacc.netw$emp_ovr10 = as.numeric(loansacc.netw$emp_ovr10)
+loansacc.netw$emp_length = NULL
+
+loansacc.netw$rent[loansacc.netw$home_ownership == "RENT" ] = 1
+loansacc.netw$rent[loansacc.netw$home_ownership != "RENT" ] = 0
+loansacc.netw$rent = as.numeric(loansacc.netw$rent)
+loansacc.netw$home_ownership = NULL
+
+loansacc.netw$verified[loansacc.netw$verification_status != "Not Verified" ] = 1
+loansacc.netw$verified[loansacc.netw$verification_status == "Not Verified" ] = 0
+loansacc.netw$verified = as.numeric(loansacc.netw$verified)
+loansacc.netw$verification_status = NULL
+
+#some dropping of columns
+loansacc.netw$state_region = NULL
+loansacc.netw$purpose = NULL # we would like to keep this by recoding it but there isn't time
+
+# create matrix version of loansacc dataset and remove column names
+loansacc.netw = as.matrix(loansacc.netw)
+
+# normalize
+loansacc.netw = normalize(loansacc.netw[,3:52])
 
 #create training and test data
 samp = sample(2, nrow(loansacc.netw), replace=TRUE, prob = c(0.5, 0.5))
-loansacc.netw.training = loansacc.netw[samp == 1, 1:59]
-loansacc.netw.testing = loansacc.netw[samp == 2, 1:59]
+loansacc.netw.training = loansacc.netw[samp == 1, 1:55]
+loansacc.netw.testing = loansacc.netw[samp == 2, 1:55]
 loansacc.netw.training.target = loansacc.netw[samp == 1, 1]
 loansacc.netw.testing.target = loansacc.netw[samp == 2, 1]
 
@@ -346,10 +377,10 @@ loansacc.netw.testing.target.labels = to_categorical(loansacc.netw.testing.targe
 
 # construct the model
 model.netw = keras_model_sequential()
-model.netw %>% layer_dense(units = 8, activation = 'relu', input_shape = c(59)) %>% layer_dense(units = 2, activation = 'softmax')
+model.netw %>% layer_dense(units = 25, activation = 'relu', input_shape = c(55)) %>% layer_dense(units = 2, activation = 'softmax')
 
 # compile and fit model
 model.netw %>% compile(loss = 'binary_crossentropy', optimizer = 'adam', metrics = 'accuracy')
 
-# fit the model
-model.netw %>% fit(loansacc.netw.training, loansacc.netw.training.target.labels, epochs = 200, batch_size = 5, validation_split = 0,2)
+# fit the model, store the model
+history = model.netw %>% fit(loansacc.netw.training, loansacc.netw.training.target.labels, epochs = 20, batch_size = 5, validation_split = 0,2)
