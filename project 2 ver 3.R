@@ -384,6 +384,9 @@ loansacc.testing.ols = loansacc.ols[-training.ols, ]
 # run regression again
 fit2 = lm(fully_paid_int ~ log_annual_inc + year + term + emp_length + verification_status + purpose + state_region + rent, data = loansacc.training.ols, x = TRUE)
 
+####### IMPORTANT VALUE #######
+summary(fit2)
+
 # make predictions based on test data and omit NAs
 pred = predict(fit2, loansacc.testing.ols)
 pred = na.omit(pred)
@@ -393,7 +396,7 @@ g = nrow(loansacc.testing.ols) - length(pred)
 g = as.numeric(g)
 loansacc.testing.ols = loansacc.testing.ols[-sample(1:nrow(loansacc.testing.ols), g), ]
 
-#calculate rmse
+#calculate rmse ####### IMPORTANT VALUE #######
 sqrt(mean((pred - loansacc.testing.ols$fully_paid_int)^2))
 
 #################### SUPPORT VECTOR MACHINES ####################
@@ -448,6 +451,8 @@ pred.svm = predict(svm.loansacc, loansacc.svm.testing)
 
 #evaluate with confusion matrix
 confusion.svm = table(loansacc.svm.testing$fully_paid, pred.svm)
+
+# table4 ################ NOT DONE YET ##################
 print(confusion.svm)
 
 # calculate rocr curve
@@ -457,7 +462,11 @@ predicted.svm$predicted.svm = as.numeric(predicted.svm$predicted.svm)
 rocr.svm = prediction(predicted.svm, loansacc.svm.testing$fully_paid)
 rocr.svm.perf = performance(rocr.svm, "tpr", "fpr")
 
-# plot the rocr curve
+# plot9
+jpeg('plot 9 - svm roc.jpg')
+plot(rocr.svm.perf, main="ROC Curve for SVM", col=2, lwd=2)
+abline(a=0, b=1, lwd=2, lty=2, col="gray")
+dev.off()
 plot(rocr.svm.perf, main="ROC Curve for SVM", col=2, lwd=2)
 abline(a=0, b=1, lwd=2, lty=2, col="gray")
 
@@ -468,6 +477,8 @@ minauc.svm = min(round(auc.svm, digits = 2))
 maxauc.svm = max(round(auc.svm, digits = 2))
 minauct.svm = paste(c("min(AUC) = "), minauc.svm, sep="")
 maxauct.svm = paste(c("max(AUC) = "), maxauc.svm, sep="")
+
+####### IMPORTANT VALUE #######
 print(auc.svm)
 
 #################### SUPPORT VECTOR MACHINES V2 - NOT IMPLEMENTED DUE TO COMPUTATION TIME ####################
