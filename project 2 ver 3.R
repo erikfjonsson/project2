@@ -133,16 +133,16 @@ South_Atlantic = c("DE", "MD", "VA", "DC", "WV", "NC", "SC", "GA", "FL")
 Middle_Atlantic = c("NY", "PA", "NJ")
 New_England = c("ME", "NH", "VT", "MA", "CT", "RI")
 loansacc$state_region = with(loansacc,
-  ifelse(addr_state %in% Pacific, "Pacific",
-  ifelse(addr_state %in% Mountain, "Mountain", 
-  ifelse(addr_state %in% Midwest, "Midwest",
-  ifelse(addr_state %in% East_North_Central, "East_North_Central",
-  ifelse(addr_state %in% West_South_Central, "West_South_Central",
-  ifelse(addr_state %in% East_South_Central, "East_South_Central",
-  ifelse(addr_state %in% South_Atlantic, "South_Atlantic",
-  ifelse(addr_state %in% Middle_Atlantic, "Middle_Atlantic",
-  ifelse(addr_state %in% New_England, "New_England",
-  "other")))))))))
+                             ifelse(addr_state %in% Pacific, "Pacific",
+                                    ifelse(addr_state %in% Mountain, "Mountain", 
+                                           ifelse(addr_state %in% Midwest, "Midwest",
+                                                  ifelse(addr_state %in% East_North_Central, "East_North_Central",
+                                                         ifelse(addr_state %in% West_South_Central, "West_South_Central",
+                                                                ifelse(addr_state %in% East_South_Central, "East_South_Central",
+                                                                       ifelse(addr_state %in% South_Atlantic, "South_Atlantic",
+                                                                              ifelse(addr_state %in% Middle_Atlantic, "Middle_Atlantic",
+                                                                                     ifelse(addr_state %in% New_England, "New_England",
+                                                                                            "other")))))))))
 )
 loansacc$addr_state = NULL
 loansacc$state_region = as.factor(loansacc$state_region)
@@ -372,12 +372,21 @@ loansacc.svm$verified = as.factor(loansacc.svm$verified)
 loansacc.svm$verification_status = NULL
 
 #draw sample
-loansacc.svm.sample = loansacc.svm[sample(nrow(loansacc), 75000),]
+loansacc.svm.sample = loansacc.svm[sample(nrow(loansacc), 50000),]
+
+#omit NAs
+loansacc.svm.sample = na.omit(loansacc.svm.sample)
 
 # split data
 svm.training = sample(dim(loansacc.svm.sample)[1], dim(loansacc.svm.sample)[1]/2)
 loansacc.svm.training = loansacc.svm.sample[svm.training, ]
 loansacc.svm.testing = loansacc.svm.sample[-svm.training, ]
+
+#remove columns with only 1 unique values
+keep1 = apply(loansacc.svm.training[1:57], 1, function(x) length(unique(x[!is.na(x)])) != 1)
+loansacc.svm.training = loansacc.svm.training[keep1, ]
+keep2 = apply(loansacc.svm.testing[1:57], 1, function(x) length(unique(x[!is.na(x)])) != 1)
+loansacc.svm.testing = loansacc.svm.testing[keep2, ]
 
 #run model
 svm.loansacc = svm(fully_paid ~., data = loansacc.svm.training)
