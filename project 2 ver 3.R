@@ -226,8 +226,9 @@ treegini1.loansacc = rpart(fully_paid ~., data = loansacc.training, method = "cl
 jpeg('plot1 - gini tree 1.jpg')
 plot(treegini1.loansacc)
 dev.off()
+plot(treegini1.loansacc)
 
-# table1
+# table1 ################ NOT DONE YET ##################
 table1 = printcp(treegini1.loansacc)
 
 
@@ -235,6 +236,7 @@ table1 = printcp(treegini1.loansacc)
 jpeg('plot2 - gini tree 1.jpg')
 plotcp(treegini1.loansacc)
 dev.off()
+plotcp(treegini1.loansacc)
 
 
 # prune the tree
@@ -243,9 +245,21 @@ prune1 = treegini1.loansacc$cptable[which.min(treegini1.loansacc$cptable[,"xerro
 
 # run tree again
 treegini2.loansacc = rpart(fully_paid ~., data = loansacc.training, method = "class", parms = list(split = "gini"), control = rpart.control(minsplit = 10, minbucket = 3, cp = prune1))
+
+
+# plot3
+jpeg('plot3 - gini tree 2.jpg')
 plot(treegini2.loansacc)
-text(treegini2.loansacc, pretty = 0)
-printcp(treegini2.loansacc)
+dev.off()
+plot(treegini2.loansacc)
+
+# table2 ################ NOT DONE YET ##################
+table2 = printcp(treegini2.loansacc)
+
+# plot4
+jpeg('plot4 - gini tree 2.jpg')
+plotcp(treegini2.loansacc)
+dev.off()
 plotcp(treegini2.loansacc)
 
 # prune the tree
@@ -254,6 +268,8 @@ treegini2.loansacc$cptable[which.min(treegini2.loansacc$cptable[,"xerror"]),"CP"
 #test the model
 predicted1 = predict(treegini2.loansacc, loansacc.testing, type = "class")
 confusion1 = table(loansacc.testing$fully_paid, predicted1)
+
+# table2 ################ NOT DONE YET ##################
 print(confusion1)
 
 # calculate rocr curve
@@ -261,7 +277,11 @@ predicted.gini.prob = predict(treegini2.loansacc, type = "prob" , loansacc.testi
 rocr.gini = prediction(predicted.gini.prob, loansacc.testing$fully_paid)
 rocr.gini.perf = performance(rocr.gini, "tpr", "fpr")
 
-# plot the rocr curve
+# plot5
+jpeg('plot 5 - gini tree 2 roc.jpg')
+plot(rocr.gini.perf, main="ROC Curve for gini tree", col=2, lwd=2)
+abline(a=0, b=1, lwd=2, lty=2, col="gray")
+dev.off()
 plot(rocr.gini.perf, main="ROC Curve for gini tree", col=2, lwd=2)
 abline(a=0, b=1, lwd=2, lty=2, col="gray")
 
@@ -272,6 +292,8 @@ minauc.gini = min(round(auc.gini, digits = 2))
 maxauc.gini = max(round(auc.gini, digits = 2))
 minauct.gini = paste(c("min(AUC) = "), minauc.gini, sep="")
 maxauct.gini = paste(c("max(AUC) = "), maxauc.gini, sep="")
+
+####### IMPORTANT VALUE ####### 
 print(auc.gini)
 
 #################### RANDOMFOREST ####################
@@ -283,11 +305,18 @@ loansacc.testing.roughfix = na.roughfix(loansacc.testing)
 # create forest
 randforest.loansacc = randomForest(fully_paid ~., data = loansacc.training, mtry = 25, ntree = 400, importance = TRUE, na.action = na.roughfix)
 
-# plot forest - error vs no of trees
+# plot6
+jpeg('plot 6 - random forest error v. no trees.jpg')
+plot(randforest.loansacc)
+legend("center", colnames(randforest.loansacc$err.rate),col=1:4,cex=0.8,fill=1:4)
+dev.off()
 plot(randforest.loansacc)
 legend("center", colnames(randforest.loansacc$err.rate),col=1:4,cex=0.8,fill=1:4)
 
-# plot forest - variable importance
+# plot 7
+jpeg('plot 7 - random forest variable importance.jpg')
+varImpPlot(randforest.loansacc)
+dev.off()
 varImpPlot(randforest.loansacc)
 
 # make predcition for test data based on model
@@ -295,6 +324,8 @@ predicted.randforest = predict(randforest.loansacc, loansacc.testing)
 
 #evaluate with confusion matrix
 confusion.rf = table(loansacc.testing$fully_paid, predicted.randforest)
+
+# table3 ################ NOT DONE YET ##################
 print(confusion.rf)
 
 # calculate rocr curve
@@ -302,7 +333,11 @@ predicted.randforest.prob = predict(randforest.loansacc, type = "prob" , loansac
 rocr.randforest = prediction(predicted.randforest.prob, loansacc.testing$fully_paid)
 rocr.randforest.perf = performance(rocr.randforest, "tpr", "fpr")
 
-# plot the rocr curve
+# # plot 8
+jpeg('plot 8 - random forest roc.jpg')
+plot(rocr.randforest.perf, main="ROC Curve for Random Forest", col=2, lwd=2)
+abline(a=0, b=1, lwd=2, lty=2, col="gray")
+dev.off()
 plot(rocr.randforest.perf, main="ROC Curve for Random Forest", col=2, lwd=2)
 abline(a=0, b=1, lwd=2, lty=2, col="gray")
 
@@ -313,6 +348,8 @@ minauc = min(round(auc, digits = 2))
 maxauc = max(round(auc, digits = 2))
 minauct = paste(c("min(AUC) = "), minauc, sep="")
 maxauct = paste(c("max(AUC) = "), maxauc, sep="")
+
+####### IMPORTANT VALUE #######
 print(auc)
 
 #################### OLS ####################
@@ -433,74 +470,74 @@ minauct.svm = paste(c("min(AUC) = "), minauc.svm, sep="")
 maxauct.svm = paste(c("max(AUC) = "), maxauc.svm, sep="")
 print(auc.svm)
 
-#################### SUPPORT VECTOR MACHINES V2 ####################
-
-svm2.loansacc = loansacc
-
-## some data cleaning
-
-# normalize numeric variables
-ind2 = sapply(svm2.loansacc, is.numeric)
-svm2.loansacc[ind2] = lapply(svm2.loansacc[ind2], scale)
-
-# some reductions in factor levels
-svm2.loansacc$emp_ovr10[svm2.loansacc$emp_length == "10+ years" ] = "10+"
-svm2.loansacc$emp_ovr10[svm2.loansacc$emp_length != "10+ years" ] = "10-"
-svm2.loansacc$emp_ovr10 = as.factor(svm2.loansacc$emp_ovr10)
-svm2.loansacc$emp_length = NULL
-
-svm2.loansacc$rent[svm2.loansacc$home_ownership == "RENT" ] = "rent"
-svm2.loansacc$rent[svm2.loansacc$home_ownership != "RENT" ] = "not_rent"
-svm2.loansacc$rent = as.factor(svm2.loansacc$rent)
-svm2.loansacc$home_ownership = NULL
-
-svm2.loansacc$verified[svm2.loansacc$verification_status != "Not Verified" ] = "verified"
-svm2.loansacc$verified[svm2.loansacc$verification_status == "Not Verified" ] = "not_verified"
-svm2.loansacc$verified = as.factor(svm2.loansacc$verified)
-svm2.loansacc$verification_status = NULL
-
-#split dataset
-svm2.training = sample(dim(svm2.loansacc)[1], dim(svm2.loansacc)[1]/2)
-svm2.loansacc.training = svm2.loansacc[svm2.training, ]
-svm2.loansacc.testing = svm2.loansacc[-svm2.training, ]
-
-# run the model
-svm2.loansacc = svm(fully_paid ~., data = svm2.loansacc.training)
-
-# make predictions
-pred.svm2 = predict(svm2.loansacc, svm2.loansacc.testing)
-
-# trim the testing data to be of same number of rows as predicted data
-h = nrow(svm2.loansacc.testing) - length(pred.svm2)
-h = as.numeric(h)
-svm2.loansacc.testing = svm2.loansacc.testing[-sample(1:nrow(svm2.loansacc.testing), h), ]
-
-#evaluate with confusion matrix
-confusion.svm2 = table(svm2.loansacc.testing$fully_paid, pred.svm2)
-print(confusion.svm2)
-
-## calculate rocr curve
-predicted.svm2 = predict(svm2.loansacc, type = "prob", svm2.loansacc.testing)
-predicted.svm2 = as.data.frame(predicted.svm2)
-
-# trim the testing data to be of same number of rows as predicted data
-j = nrow(svm2.loansacc.testing) - nrow(predicted.svm2)
-j = as.numeric(j)
-svm2.loansacc.testing = svm2.loansacc.testing[-sample(1:nrow(svm2.loansacc.testing), j), ]
-
-predicted.svm2$predicted.svm2 = as.numeric(predicted.svm2$predicted.svm2)
-rocr.svm2 = prediction(predicted.svm2, svm2.loansacc.testing$fully_paid)
-rocr.svm2.perf = performance(rocr.svm2, "tpr", "fpr")
-
-# plot the rocr curve
-plot(rocr.svm2.perf, main="ROC Curve for SVM", col=2, lwd=2)
-abline(a=0, b=1, lwd=2, lty=2, col="gray")
-
-# compute area under rocr curve
-auc.svm2 = performance(rocr.svm2,"auc")
-auc.svm2 = unlist(slot(auc.svm2, "y.values"))
-minauc.svm2 = min(round(auc.svm2, digits = 2))
-maxauc.svm2 = max(round(auc.svm2, digits = 2))
-minauct.svm2 = paste(c("min(AUC) = "), minauc.svm2, sep="")
-maxauct.svm2 = paste(c("max(AUC) = "), maxauc.svm2, sep="")
-print(auc.svm2)
+#################### SUPPORT VECTOR MACHINES V2 - NOT IMPLEMENTED DUE TO COMPUTATION TIME ####################
+# 
+# svm2.loansacc = loansacc
+# 
+# ## some data cleaning
+# 
+# # normalize numeric variables
+# ind2 = sapply(svm2.loansacc, is.numeric)
+# svm2.loansacc[ind2] = lapply(svm2.loansacc[ind2], scale)
+# 
+# # some reductions in factor levels
+# svm2.loansacc$emp_ovr10[svm2.loansacc$emp_length == "10+ years" ] = "10+"
+# svm2.loansacc$emp_ovr10[svm2.loansacc$emp_length != "10+ years" ] = "10-"
+# svm2.loansacc$emp_ovr10 = as.factor(svm2.loansacc$emp_ovr10)
+# svm2.loansacc$emp_length = NULL
+# 
+# svm2.loansacc$rent[svm2.loansacc$home_ownership == "RENT" ] = "rent"
+# svm2.loansacc$rent[svm2.loansacc$home_ownership != "RENT" ] = "not_rent"
+# svm2.loansacc$rent = as.factor(svm2.loansacc$rent)
+# svm2.loansacc$home_ownership = NULL
+# 
+# svm2.loansacc$verified[svm2.loansacc$verification_status != "Not Verified" ] = "verified"
+# svm2.loansacc$verified[svm2.loansacc$verification_status == "Not Verified" ] = "not_verified"
+# svm2.loansacc$verified = as.factor(svm2.loansacc$verified)
+# svm2.loansacc$verification_status = NULL
+# 
+# #split dataset
+# svm2.training = sample(dim(svm2.loansacc)[1], dim(svm2.loansacc)[1]/2)
+# svm2.loansacc.training = svm2.loansacc[svm2.training, ]
+# svm2.loansacc.testing = svm2.loansacc[-svm2.training, ]
+# 
+# # run the model
+# svm2.loansacc = svm(fully_paid ~., data = svm2.loansacc.training)
+# 
+# # make predictions
+# pred.svm2 = predict(svm2.loansacc, svm2.loansacc.testing)
+# 
+# # trim the testing data to be of same number of rows as predicted data
+# h = nrow(svm2.loansacc.testing) - length(pred.svm2)
+# h = as.numeric(h)
+# svm2.loansacc.testing = svm2.loansacc.testing[-sample(1:nrow(svm2.loansacc.testing), h), ]
+# 
+# #evaluate with confusion matrix
+# confusion.svm2 = table(svm2.loansacc.testing$fully_paid, pred.svm2)
+# print(confusion.svm2)
+# 
+# ## calculate rocr curve
+# predicted.svm2 = predict(svm2.loansacc, type = "prob", svm2.loansacc.testing)
+# predicted.svm2 = as.data.frame(predicted.svm2)
+# 
+# # trim the testing data to be of same number of rows as predicted data
+# j = nrow(svm2.loansacc.testing) - nrow(predicted.svm2)
+# j = as.numeric(j)
+# svm2.loansacc.testing = svm2.loansacc.testing[-sample(1:nrow(svm2.loansacc.testing), j), ]
+# 
+# predicted.svm2$predicted.svm2 = as.numeric(predicted.svm2$predicted.svm2)
+# rocr.svm2 = prediction(predicted.svm2, svm2.loansacc.testing$fully_paid)
+# rocr.svm2.perf = performance(rocr.svm2, "tpr", "fpr")
+# 
+# # plot the rocr curve
+# plot(rocr.svm2.perf, main="ROC Curve for SVM", col=2, lwd=2)
+# abline(a=0, b=1, lwd=2, lty=2, col="gray")
+# 
+# # compute area under rocr curve
+# auc.svm2 = performance(rocr.svm2,"auc")
+# auc.svm2 = unlist(slot(auc.svm2, "y.values"))
+# minauc.svm2 = min(round(auc.svm2, digits = 2))
+# maxauc.svm2 = max(round(auc.svm2, digits = 2))
+# minauct.svm2 = paste(c("min(AUC) = "), minauc.svm2, sep="")
+# maxauct.svm2 = paste(c("max(AUC) = "), maxauc.svm2, sep="")
+# print(auc.svm2)
