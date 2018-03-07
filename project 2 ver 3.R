@@ -9,7 +9,7 @@
 getwd()
 
 #set working directory
-setwd("D:/Erik/Dokument/764 local files/project 2") 
+setwd("C:/Users/erikj/Documents/764 local files/project 2") 
 
 #get relevant libraries
 library(tree)
@@ -22,9 +22,7 @@ library(e1071)
 library(leaps)
 library(MASS)
 library(ggplot2)
-library(rJava)
-library(xlsxjars)
-library(xlsx)
+library(caret)
 
 ## import data with accepted loans
 loansacc = read.csv("loans_accepted.csv", header=TRUE, sep=",", dec=".", stringsAsFactors = TRUE) #import data with accepted loans
@@ -265,9 +263,11 @@ plotcp(treegini2.loansacc)
 # prune the tree
 treegini2.loansacc$cptable[which.min(treegini2.loansacc$cptable[,"xerror"]),"CP"]
 
-#test the model
+#make predictions
 predicted1 = predict(treegini2.loansacc, loansacc.testing, type = "class")
-confusion1 = table(loansacc.testing$fully_paid, predicted1)
+
+#confusion matrix
+confusion1 = confusionMatrix(predicted1, loansacc.testing$fully_paid)
 
 # table2 ################ NOT DONE YET ##################
 print(confusion1)
@@ -319,14 +319,14 @@ varImpPlot(randforest.loansacc)
 dev.off()
 varImpPlot(randforest.loansacc)
 
-# make predcition for test data based on model
+# make predcition for test data
 predicted.randforest = predict(randforest.loansacc, loansacc.testing)
 
-#evaluate with confusion matrix
-confusion.rf = table(loansacc.testing$fully_paid, predicted.randforest)
+#confusion matrix
+confusion2 = confusionMatrix(predicted.randforest, loansacc.testing$fully_paid)
 
 # table3 ################ NOT DONE YET ##################
-print(confusion.rf)
+print(confusion2)
 
 # calculate rocr curve
 predicted.randforest.prob = predict(randforest.loansacc, type = "prob" , loansacc.testing)[,2]
@@ -389,6 +389,13 @@ summary(fit2)
 
 # make predictions based on test data and omit NAs
 pred = predict(fit2, loansacc.testing.ols)
+
+#confusion matrix
+confusion3 = confusionMatrix(pred, loansacc.testing.ols$fully_paid_int)
+
+# table3 ################ NOT DONE YET ##################
+print(confusion3)
+
 pred = na.omit(pred)
 
 # trim the testing data to be of same number of rows as predicted data
@@ -449,10 +456,10 @@ svm.loansacc = svm(fully_paid ~., data = loansacc.svm.training)
 # make predictions
 pred.svm = predict(svm.loansacc, loansacc.svm.testing)
 
-#evaluate with confusion matrix
-confusion.svm = table(loansacc.svm.testing$fully_paid, pred.svm)
+#confusion matrix
+confusion4 = confusionMatrix(pred.sv loansacc.svm.testing$fully_paid)
 
-# table4 ################ NOT DONE YET ##################
+# table5 ################ NOT DONE YET ##################
 print(confusion.svm)
 
 # calculate rocr curve
