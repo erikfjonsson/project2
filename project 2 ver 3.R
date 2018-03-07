@@ -296,6 +296,7 @@ maxauct.gini = paste(c("max(AUC) = "), maxauc.gini, sep="")
 ####### IMPORTANT VALUE ####### 
 print(auc.gini)
 
+
 #################### RANDOMFOREST ####################
 
 # roughfix
@@ -368,7 +369,7 @@ loansacc.training.ols = loansacc.ols[training.ols, ]
 loansacc.testing.ols = loansacc.ols[-training.ols, ]
 
 # run regression
-fit1 = lm(fully_paid_int ~ log_annual_inc + year + term + emp_length + home_ownership + purpose + verification_status + state_region, data = loansacc.training.ols, x = TRUE)
+fit1 = lm(fully_paid_int ~ log_annual_inc + year + term + emp_length + home_ownership + purpose + verification_status + state_region + fico, data = loansacc.training.ols, x = TRUE)
 
 # recode home_ownership into rent-dummy-variable
 loansacc.ols$rent[loansacc.ols$home_ownership == "RENT" ] = "rent"
@@ -382,20 +383,13 @@ loansacc.training.ols = loansacc.ols[training.ols, ]
 loansacc.testing.ols = loansacc.ols[-training.ols, ]
 
 # run regression again
-fit2 = lm(fully_paid_int ~ log_annual_inc + year + term + emp_length + verification_status + purpose + state_region + rent, data = loansacc.training.ols, x = TRUE)
+fit2 = lm(fully_paid_int ~ log_annual_inc + year + term + emp_length + verification_status + purpose + state_region + rent + fico, data = loansacc.training.ols, x = TRUE)
 
 ####### IMPORTANT VALUE #######
 summary(fit2)
 
 # make predictions based on test data and omit NAs
 pred = predict(fit2, loansacc.testing.ols)
-
-#confusion matrix
-confusion3 = confusionMatrix(pred, loansacc.testing.ols$fully_paid_int)
-
-# table3 ################ NOT DONE YET ##################
-print(confusion3)
-
 pred = na.omit(pred)
 
 # trim the testing data to be of same number of rows as predicted data
@@ -433,11 +427,11 @@ loansacc.svm$verified[loansacc.svm$verification_status == "Not Verified" ] = "no
 loansacc.svm$verified = as.factor(loansacc.svm$verified)
 loansacc.svm$verification_status = NULL
 
-#draw sample
-loansacc.svm.sample = loansacc.svm[sample(nrow(loansacc), 70000),]
-
 #omit NAs
 loansacc.svm.sample = na.omit(loansacc.svm.sample)
+
+#draw sample
+loansacc.svm.sample = loansacc.svm[sample(nrow(loansacc), 70000),]
 
 # split data
 svm.training = sample(dim(loansacc.svm.sample)[1], dim(loansacc.svm.sample)[1]/2)
@@ -457,10 +451,10 @@ svm.loansacc = svm(fully_paid ~., data = loansacc.svm.training)
 pred.svm = predict(svm.loansacc, loansacc.svm.testing)
 
 #confusion matrix
-confusion4 = confusionMatrix(pred.sv loansacc.svm.testing$fully_paid)
+confusion4 = confusionMatrix(pred.svm, loansacc.svm.testing$fully_paid)
 
 # table5 ################ NOT DONE YET ##################
-print(confusion.svm)
+print(confusion4)
 
 # calculate rocr curve
 predicted.svm = predict(svm.loansacc, type = "prob", loansacc.svm.testing)
@@ -487,75 +481,3 @@ maxauct.svm = paste(c("max(AUC) = "), maxauc.svm, sep="")
 
 ####### IMPORTANT VALUE #######
 print(auc.svm)
-
-#################### SUPPORT VECTOR MACHINES V2 - NOT IMPLEMENTED DUE TO COMPUTATION TIME ####################
-# 
-# svm2.loansacc = loansacc
-# 
-# ## some data cleaning
-# 
-# # normalize numeric variables
-# ind2 = sapply(svm2.loansacc, is.numeric)
-# svm2.loansacc[ind2] = lapply(svm2.loansacc[ind2], scale)
-# 
-# # some reductions in factor levels
-# svm2.loansacc$emp_ovr10[svm2.loansacc$emp_length == "10+ years" ] = "10+"
-# svm2.loansacc$emp_ovr10[svm2.loansacc$emp_length != "10+ years" ] = "10-"
-# svm2.loansacc$emp_ovr10 = as.factor(svm2.loansacc$emp_ovr10)
-# svm2.loansacc$emp_length = NULL
-# 
-# svm2.loansacc$rent[svm2.loansacc$home_ownership == "RENT" ] = "rent"
-# svm2.loansacc$rent[svm2.loansacc$home_ownership != "RENT" ] = "not_rent"
-# svm2.loansacc$rent = as.factor(svm2.loansacc$rent)
-# svm2.loansacc$home_ownership = NULL
-# 
-# svm2.loansacc$verified[svm2.loansacc$verification_status != "Not Verified" ] = "verified"
-# svm2.loansacc$verified[svm2.loansacc$verification_status == "Not Verified" ] = "not_verified"
-# svm2.loansacc$verified = as.factor(svm2.loansacc$verified)
-# svm2.loansacc$verification_status = NULL
-# 
-# #split dataset
-# svm2.training = sample(dim(svm2.loansacc)[1], dim(svm2.loansacc)[1]/2)
-# svm2.loansacc.training = svm2.loansacc[svm2.training, ]
-# svm2.loansacc.testing = svm2.loansacc[-svm2.training, ]
-# 
-# # run the model
-# svm2.loansacc = svm(fully_paid ~., data = svm2.loansacc.training)
-# 
-# # make predictions
-# pred.svm2 = predict(svm2.loansacc, svm2.loansacc.testing)
-# 
-# # trim the testing data to be of same number of rows as predicted data
-# h = nrow(svm2.loansacc.testing) - length(pred.svm2)
-# h = as.numeric(h)
-# svm2.loansacc.testing = svm2.loansacc.testing[-sample(1:nrow(svm2.loansacc.testing), h), ]
-# 
-# #evaluate with confusion matrix
-# confusion.svm2 = table(svm2.loansacc.testing$fully_paid, pred.svm2)
-# print(confusion.svm2)
-# 
-# ## calculate rocr curve
-# predicted.svm2 = predict(svm2.loansacc, type = "prob", svm2.loansacc.testing)
-# predicted.svm2 = as.data.frame(predicted.svm2)
-# 
-# # trim the testing data to be of same number of rows as predicted data
-# j = nrow(svm2.loansacc.testing) - nrow(predicted.svm2)
-# j = as.numeric(j)
-# svm2.loansacc.testing = svm2.loansacc.testing[-sample(1:nrow(svm2.loansacc.testing), j), ]
-# 
-# predicted.svm2$predicted.svm2 = as.numeric(predicted.svm2$predicted.svm2)
-# rocr.svm2 = prediction(predicted.svm2, svm2.loansacc.testing$fully_paid)
-# rocr.svm2.perf = performance(rocr.svm2, "tpr", "fpr")
-# 
-# # plot the rocr curve
-# plot(rocr.svm2.perf, main="ROC Curve for SVM", col=2, lwd=2)
-# abline(a=0, b=1, lwd=2, lty=2, col="gray")
-# 
-# # compute area under rocr curve
-# auc.svm2 = performance(rocr.svm2,"auc")
-# auc.svm2 = unlist(slot(auc.svm2, "y.values"))
-# minauc.svm2 = min(round(auc.svm2, digits = 2))
-# maxauc.svm2 = max(round(auc.svm2, digits = 2))
-# minauct.svm2 = paste(c("min(AUC) = "), minauc.svm2, sep="")
-# maxauct.svm2 = paste(c("max(AUC) = "), maxauc.svm2, sep="")
-# print(auc.svm2)
