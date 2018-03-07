@@ -349,21 +349,35 @@ sqrt(mean((pred - loansacc.testing.ols$fully_paid_int)^2))
 #create data frame for svm part
 loansacc.svm = loansacc
 
+## some data cleaning
+
+# normalize numeric variables
+ind1 = sapply(loansacc.svm, is.numeric)
+loansacc.svm[ind1] = lapply(loansacc.svm[ind1], scale)
+
+# some reductions in factor levels
+loansacc.svm$emp_ovr10[loansacc.svm$emp_length == "10+ years" ] = "10+"
+loansacc.svm$emp_ovr10[loansacc.svm$emp_length != "10+ years" ] = "10-"
+loansacc.svm$emp_ovr10 = as.factor(loansacc.svm$emp_ovr10)
+loansacc.svm$emp_length = NULL
+
+loansacc.svm$rent[loansacc.svm$home_ownership == "RENT" ] = "rent"
+loansacc.svm$rent[loansacc.svm$home_ownership != "RENT" ] = "not_rent"
+loansacc.svm$rent = as.factor(loansacc.svm$rent)
+loansacc.svm$home_ownership = NULL
+
+loansacc.svm$verified[loansacc.svm$verification_status != "Not Verified" ] = "verified"
+loansacc.svm$verified[loansacc.svm$verification_status == "Not Verified" ] = "not_verified"
+loansacc.svm$verified = as.factor(loansacc.svm$verified)
+loansacc.svm$verification_status = NULL
+
 #draw sample
 loansacc.svm.sample = loansacc.svm[sample(nrow(loansacc), 75000),]
-
-loansacc.svm.sample = na.omit(loansacc.svm.sample)
 
 # split data
 svm.training = sample(dim(loansacc.svm.sample)[1], dim(loansacc.svm.sample)[1]/2)
 loansacc.svm.training = loansacc.svm.sample[svm.training, ]
 loansacc.svm.testing = loansacc.svm.sample[-svm.training, ]
-
-#remove columns with only 1 unique values
-keep1 = apply(loansacc.svm.training[1:57], 1, function(x) length(unique(x[!is.na(x)])) != 1)
-loansacc.svm.training = loansacc.svm.training[keep1, ]
-keep2 = apply(loansacc.svm.testing[1:57], 1, function(x) length(unique(x[!is.na(x)])) != 1)
-loansacc.svm.testing = loansacc.svm.testing[keep2, ]
 
 #run model
 svm.loansacc = svm(fully_paid ~., data = loansacc.svm.training)
@@ -426,4 +440,32 @@ svm2.training = sample(dim(svm2.loansacc)[1], dim(svm2.loansacc)[1]/2)
 svm2.loansacc.training = svm2.loansacc[svm2.training, ]
 svm2.loansacc.testing = svm2.loansacc[-svm2.training, ]
 
+# run the model
 svm2.loansacc = svm(fully_paid ~., data = svm2.loansacc.training)
+
+# make predictions
+pred.svm2 = predict(svm2.loansacc, svm2.loansacc.testing)
+
+#evaluate with confusion matrix
+confusion.svm2 = table(svm2.loansacc.testing$fully_paid, pred.svm2)
+print(confusion.svm2)
+
+# calculate rocr curve
+predicted.svm2 = predict(svm2.loansacc, type = "prob", svm2.loansacc.testing)
+predicted.svm2 = as.data.frame(predicted.svm2)
+predicted.svm2$predicted.svm2 = as.numeric(predicted.svm2$predicted.svm2)
+rocr.svm2 = prediction(predicted.svm2, svm2.loansacc.testing$fully_paid)
+rocr.svm2.perf = performance(rocr.svm2, "tpr", "fpr")
+
+# plot the rocr curve
+plot(rocr.svm2.perf, main="ROC Curve for SVM", col=2, lwd=2)
+abline(a=0, b=1, lwd=2, lty=2, col="gray")
+
+# compute area under rocr curve
+auc.svm2 = performance(rocr.svm2,"auc")
+auc.svm2 = unlist(slot(auc.svm2, "y.values"))
+minauc.svm2 = min(round(auc.svm2, digits = 2))
+maxauc.svm2 = max(round(auc.svm2, digits = 2))
+minauct.svm2 = paste(c("min(AUC) = "), minauc.svm2, sep="")
+maxauct.svm2 = paste(c("max(AUC) = "), maxauc.svm2, sep="")
+print(auc.svm2)
