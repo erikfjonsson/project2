@@ -21,6 +21,10 @@ library(party)
 library(e1071)
 library(leaps)
 library(MASS)
+library(ggplot2)
+library(rJava)
+library(xlsxjars)
+library(xlsx)
 
 ## import data with accepted loans
 loansacc = read.csv("loans_accepted.csv", header=TRUE, sep=",", dec=".", stringsAsFactors = TRUE) #import data with accepted loans
@@ -217,10 +221,21 @@ loansacc.testing = loansacc[-training, ]
 
 ## create and show the tree
 treegini1.loansacc = rpart(fully_paid ~., data = loansacc.training, method = "class", parms = list(split = "gini"), control = rpart.control(minsplit = 10, minbucket = 3, cp = 0.0001))
+
+# plot1
+jpeg('plot1 - gini tree 1.jpg')
 plot(treegini1.loansacc)
-text(treegini1.loansacc, pretty = 0)
-printcp(treegini1.loansacc)
+dev.off()
+
+# table1
+table1 = printcp(treegini1.loansacc)
+
+
+# plot2
+jpeg('plot2 - gini tree 1.jpg')
 plotcp(treegini1.loansacc)
+dev.off()
+
 
 # prune the tree
 treegini1.loansacc$cptable[which.min(treegini1.loansacc$cptable[,"xerror"]),"CP"]
@@ -455,13 +470,24 @@ svm2.loansacc = svm(fully_paid ~., data = svm2.loansacc.training)
 # make predictions
 pred.svm2 = predict(svm2.loansacc, svm2.loansacc.testing)
 
+# trim the testing data to be of same number of rows as predicted data
+h = nrow(svm2.loansacc.testing) - length(pred.svm2)
+h = as.numeric(h)
+svm2.loansacc.testing = svm2.loansacc.testing[-sample(1:nrow(svm2.loansacc.testing), h), ]
+
 #evaluate with confusion matrix
 confusion.svm2 = table(svm2.loansacc.testing$fully_paid, pred.svm2)
 print(confusion.svm2)
 
-# calculate rocr curve
+## calculate rocr curve
 predicted.svm2 = predict(svm2.loansacc, type = "prob", svm2.loansacc.testing)
 predicted.svm2 = as.data.frame(predicted.svm2)
+
+# trim the testing data to be of same number of rows as predicted data
+j = nrow(svm2.loansacc.testing) - nrow(predicted.svm2)
+j = as.numeric(j)
+svm2.loansacc.testing = svm2.loansacc.testing[-sample(1:nrow(svm2.loansacc.testing), j), ]
+
 predicted.svm2$predicted.svm2 = as.numeric(predicted.svm2$predicted.svm2)
 rocr.svm2 = prediction(predicted.svm2, svm2.loansacc.testing$fully_paid)
 rocr.svm2.perf = performance(rocr.svm2, "tpr", "fpr")
