@@ -372,7 +372,7 @@ loansacc.svm$verified = as.factor(loansacc.svm$verified)
 loansacc.svm$verification_status = NULL
 
 #draw sample
-loansacc.svm.sample = loansacc.svm[sample(nrow(loansacc), 50000),]
+loansacc.svm.sample = loansacc.svm[sample(nrow(loansacc), 70000),]
 
 #omit NAs
 loansacc.svm.sample = na.omit(loansacc.svm.sample)
