@@ -1,15 +1,15 @@
 #### Project 2
-#### Author: Erik Jonsson (23621)
+#### Authors: Erik Jonsson (23621), BrunoWisniewski (23653), Jingcheng Zhao (23048), Adrian Bjurefalk (23519)
 
 ######################################################################
 
 #### set up the assignment
 
 #get working directory
-getwd()
+wd = getwd()
 
 #set working directory
-setwd("C:/Users/erikj/Documents/764 local files/project 2") 
+setwd(wd) 
 
 #get relevant libraries
 library(tree)
