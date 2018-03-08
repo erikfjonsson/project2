@@ -427,11 +427,11 @@ loansacc.svm$verified[loansacc.svm$verification_status == "Not Verified" ] = "no
 loansacc.svm$verified = as.factor(loansacc.svm$verified)
 loansacc.svm$verification_status = NULL
 
-#omit NAs
-loansacc.svm.sample = na.omit(loansacc.svm.sample)
-
 #draw sample
 loansacc.svm.sample = loansacc.svm[sample(nrow(loansacc), 70000),]
+
+#omit NAs
+loansacc.svm.sample = na.omit(loansacc.svm.sample)
 
 # split data
 svm.training = sample(dim(loansacc.svm.sample)[1], dim(loansacc.svm.sample)[1]/2)
@@ -481,3 +481,4 @@ maxauct.svm = paste(c("max(AUC) = "), maxauc.svm, sep="")
 
 ####### IMPORTANT VALUE #######
 print(auc.svm)
+
