@@ -1,0 +1,487 @@
+# Set the working directory (remember to use / in windows)
+# inside your working directory, please create the following folders: credentials, data
+setwd("D:/Users/Jingcheng/Documents/GitHub/projekt 3")
+
+
+#install the necessary packages
+install.packages("twitteR")
+install.packages("wordcloud")
+install.packages("tm")
+install.packages("scales")
+install.packages("quanteda", dependencies=TRUE)
+install.packages("data.table", dependencies=TRUE)
+
+
+library("NLP")
+library("twitteR")
+library("RColorBrewer")
+library("wordcloud")
+library("tm")
+library("scales")
+library("quanteda")
+
+
+#necessary file for Windows
+download.file(url="http://curl.haxx.se/ca/cacert.pem", destfile="cacert.pem")
+
+consumer_key <- "3svUyVcHcZRYR9QHohGchLWf2"
+consumer_secret <- "7LLNotGoFa2iJLn8lvhqkoBVQX4IVPHKg1WgFV7weFKuXLZry4"
+access_token <- "224384847-QOSdf3rM3VmU7B8VmH1VLFnbkTP6zP2aS87rQhXt"
+access_secret <- "gqXFsuxbiT3R4SsiGjpz2jbgEsi1CkvXkkthIvkCxLOwy"
+
+setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
+
+
+
+#The original example used the twitteR library to pull in a user stream
+#rdmTweets <- userTimeline("psychemedia", n=100)
+#Instead, I'm going to pull in a search around a hashtag.
+
+#Walmart
+
+  tweets1 <- searchTwitter("Walmart -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("Walmart -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("Walmart -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("Walmart -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("Walmart -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("Walmart -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("Walmart -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("Walmart -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  walmart <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+
+#audi
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("audi -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("audi -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("audi -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("audi -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("audi -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("audi -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("audi -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("audi -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  audi <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+
+#bmw
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("bmw -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("bmw -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("bmw -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("bmw -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("bmw -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("bmw -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("bmw -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("bmw -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  bmw <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+#microsoft
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("microsoft -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("microsoft -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("microsoft -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("microsoft -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("microsoft -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("microsoft -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("microsoft -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("microsoft -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  microsoft <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  
+  
+  #tesla
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("tesla -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("tesla -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("tesla -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("tesla -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("tesla -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("tesla -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("tesla -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("tesla -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  tesla <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+
+  
+  #comcast
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("comcast -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("comcast -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("comcast -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("comcast -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("comcast -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("comcast -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("comcast -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("comcast -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  comcast <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  
+  #nestle
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("nestle -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("nestle -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("nestle -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("nestle -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("nestle -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("nestle -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("nestle -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("nestle -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  nestle <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  
+  #ibm
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("ibm -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("ibm -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("ibm -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("ibm -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("ibm -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("ibm -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("ibm -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("ibm -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  ibm <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  
+  #pfizer
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("pfizer -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("pfizer -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("pfizer -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("pfizer -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("pfizer -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("pfizer -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("pfizer -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("pfizer -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  pfizer <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  
+  
+  #siemens
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("siemens -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("siemens -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("siemens -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("siemens -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("siemens -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("siemens -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("siemens -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("siemens -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  siemens <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  
+  
+  #intel
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("intel -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("intel -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("intel -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("intel -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("intel -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("intel -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("intel -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("intel -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  intel <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  #cisco
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("cisco -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("cisco -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("cisco -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("cisco -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("cisco -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("cisco -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("cisco -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("cisco -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  cisco <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  
+  #disney
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("disney -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("disney -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("disney -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("disney -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("disney -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("disney -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("disney -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("disney -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  disney <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  #oracle
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("oracle -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("oracle -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("oracle -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("oracle -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("oracle -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("oracle -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("oracle -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("oracle -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  oracle <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  #boeing
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("boeing -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("boeing -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("boeing -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("boeing -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("boeing -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("boeing -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("boeing -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("boeing -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  boeing <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  #roche
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("roche -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("roche -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("roche -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("roche -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("roche -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("roche -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("roche -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("roche -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  roche <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  
+  #sanofi
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("sanofi -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("sanofi -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("sanofi -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("sanofi -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("sanofi -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("sanofi -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("sanofi -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("sanofi -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  sanofi <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  
+  #bayer
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("bayer -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("bayer -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("bayer -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("bayer -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("bayer -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("bayer -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("bayer -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("bayer -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  bayer <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  
+  #unilever
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("unilever -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("unilever -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("unilever -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("unilever -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("unilever -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("unilever -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("unilever -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("unilever -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  unilever <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+  
+  
+  #icbc
+  rm(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  tweets1 <- searchTwitter("icbc -filter:retweets", n=500, since='2018-03-05', until='2018-03-06', retryOnRateLimit = 15, lang= "en")
+  tweets2 <- searchTwitter("icbc -filter:retweets", n=500, since='2018-03-06', until='2018-03-07', retryOnRateLimit = 15, lang= "en")
+  tweets3 <- searchTwitter("icbc -filter:retweets", n=500, since='2018-03-07', until='2018-03-08', retryOnRateLimit = 15, lang= "en")
+  tweets4 <- searchTwitter("icbc -filter:retweets", n=500, since='2018-03-08', until='2018-03-09', retryOnRateLimit = 15, lang= "en")
+  tweets5 <- searchTwitter("icbc -filter:retweets", n=500, since='2018-03-09', until='2018-03-10', retryOnRateLimit = 15, lang= "en")
+  tweets6 <- searchTwitter("icbc -filter:retweets", n=500, since='2018-03-10', until='2018-03-11', retryOnRateLimit = 15, lang= "en")
+  tweets7 <- searchTwitter("icbc -filter:retweets", n=500, since='2018-03-11', until='2018-03-12', retryOnRateLimit = 15, lang= "en")
+  tweets8 <- searchTwitter("icbc -filter:retweets", n=500, since='2018-03-12', until='2018-03-13', retryOnRateLimit = 15, lang= "en")
+  
+  rdmTweets <- rbind(tweets1, tweets2, tweets3, tweets4, tweets5, tweets6, tweets7, tweets8)
+  
+  icbc <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+  
+
+  
+## Some data processing
+# Create a new column called company for each data frame
+  
+  walmart["company"] = "walmart"
+  audi["company"] = "audi"
+  bmw["company"] = "bmw"
+  microsoft["company"] = "microsoft"
+  tesla["company"] = "tesla"
+  comcast["company"] = "comcast"
+  nestle["company"] = "nestle"
+  ibm["company"] = "ibm"
+  pfizer["company"] = "pfizer"
+  siemens["company"] = "siemens"
+  intel["company"] = "intel"
+  cisco["company"] = "cisco"
+  disney["company"] = "disney"
+  oracle["company"] = "oracle"
+  boeing["company"] = "boeing"
+  roche["company"] = "roche"
+  sanofi["company"] = "sanofi"
+  bayer["company"] = "bayer"
+  unilever["company"] = "unilever"
+  icbc["company"] = "icbc"
+  
+#let's create some CSV files just in case
+  
+  write.csv(walmart, file="data/walmart.csv", row.names=FALSE)
+  write.csv(audi, file="data/audi.csv", row.names=FALSE)
+  write.csv(bmw, file="data/bmw.csv", row.names=FALSE)
+  write.csv(microsoft, file="data/microsoft.csv", row.names=FALSE)
+  write.csv(tesla, file="data/tesla.csv", row.names=FALSE)
+  write.csv(comcast, file="data/comcast.csv", row.names=FALSE)
+  write.csv(nestle, file="data/nestle.csv", row.names=FALSE)
+  write.csv(ibm, file="data/ibm.csv", row.names=FALSE)
+  write.csv(pfizer, file="data/pfizer.csv", row.names=FALSE)
+  write.csv(siemens, file="data/siemens.csv", row.names=FALSE)
+  write.csv(intel, file="data/intel.csv", row.names=FALSE)
+  write.csv(cisco, file="data/cisco.csv", row.names=FALSE)
+  write.csv(disney, file="data/disney.csv", row.names=FALSE)
+  write.csv(oracle, file="data/oracle.csv", row.names=FALSE)
+  write.csv(boeing, file="data/boeing.csv", row.names=FALSE)
+  write.csv(roche, file="data/roche.csv", row.names=FALSE)
+  write.csv(sanofi, file="data/sanofi.csv", row.names=FALSE)
+  write.csv(bayer, file="data/bayer.csv", row.names=FALSE)
+  write.csv(unilever, file="data/unilever.csv", row.names=FALSE)
+  write.csv(icbc, file="data/icbc.csv", row.names=FALSE)
+
+#Let's now aggregate these into one dataframe
+  
+  #Aggregate dataset
+  
+  #let's first make sure that our dates are formated as characters, just to be able to quickly substring them later. rbind converts them otherwise in the aggregating process.
+  walmart$created <-as.character(walmart$created)
+  audi$created <-as.character(audi$created)
+  bmw$created <-as.character(bmw$created)
+  microsoft$created <-as.character(microsoft$created)
+  tesla$created <-as.character(tesla$created)
+  comcast$created <-as.character(comcast$created)
+  nestle$created <-as.character(nestle$created)
+  ibm$created <-as.character(ibm$created)
+  pfizer$created <-as.character(pfizer$created)
+  siemens$created <-as.character(siemens$created)
+  intel$created <-as.character(intel$created)
+  cisco$created <-as.character(cisco$created)
+  disney$created <-as.character(disney$created)
+  oracle$created <-as.character(oracle$created)
+  boeing$created <-as.character(boeing$created)
+  roche$created <-as.character(roche$created)
+  sanofi$created <-as.character(sanofi$created)
+  bayer$created <-as.character(bayer$created)
+  unilever$created <-as.character(unilever$created)
+  icbc$created <-as.character(icbc$created)
+  
+  #now make them into a new dataframe "tweets"
+  tweets <- rbind(walmart, audi, bmw, microsoft, tesla, comcast, nestle, ibm, pfizer, siemens, intel, cisco, disney, oracle, boeing, roche, sanofi, bayer, unilever, icbc)
+
+  #write to CSV
+  write.csv(tweets, file="data/tweets.csv", row.names=FALSE)
+  
+  #load from cSV
+  rm(tweets)
+  tweets <- read.csv("data/tweets.csv", stringsAsFactors=F)
+  
+  #reformate datetime to just date
+  
+  tweets$date <- substr(tweets$created, 1, 10)
+  tweets$created = NULL
+
+  
+  
+# Analyse sentiments
+  
+  library(quanteda)
+  library(scales)
+  
+  # loading lexicon of positive and negative words (from Neal Caren)
+  lexicon <- read.csv("data/lexicon.csv", stringsAsFactors=F)
+  pos.words <- lexicon$word[lexicon$polarity=="positive"]
+  neg.words <- lexicon$word[lexicon$polarity=="negative"]
+  
+  # a look at a random sample of positive and negative words
+  sample(pos.words, 10)
+  sample(neg.words, 10)
+  
+  #We will use the quanteda package to convert our text to a corpus object and detect whether each document mentions the words in the dictionary.
+  twcorpus <- corpus(tweets$text)
+  
+  # first we construct a dictionary object
+  mydict <- dictionary(list(negative = neg.words,
+                            positive = pos.words))
+  # apply it to our corpus
+  sent <- dfm(twcorpus, dictionary = mydict)
+  # and add it as a new variable
+  tweets$score <- as.numeric(sent[,2]) - as.numeric(sent[,1])
+  
+#load in whether stocks went up that day or not 
+  stocks <- read.csv("data/stocks.csv", stringsAsFactors=F, sep=";", header=T)
+  
+x = merge (tweets, stocks, by.tweets=c("country","date"),  by.stocks=c("country","date"))
+    
+## Now it's time to aggregate per company and day
+  
+  library("data.table")
+  require(data.table)
+  dt <- data.table(tweets)
+  attach(tweets)
+  dt.out <- dt[, list(max.score=max(score), mean.score=mean(score), mean.favorite.score=mean(score*favoriteCount), sum.favorite.score=sum(score*favoriteCount), mean.retweet.score=mean(score*retweetCount), sum.retweet.score=sum(score*retweetCount)), 
+               by=c("company","date")]
+  
+  y = merge (dt.out, stocks, by.dt.out=c("country","date"),  by.stocks=c("country","date"))
